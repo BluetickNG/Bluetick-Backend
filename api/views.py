@@ -15,6 +15,7 @@ from .models import User
 
 SECRET_KEY='omo'
 
+@csrf_exempt
 def getToken(request):
     auth = request.headers['Authorization']
     if auth is not None:
@@ -23,6 +24,8 @@ def getToken(request):
     
     return None
 
+
+@csrf_exempt
 def index(request):
     token = getToken(request)
     data = jwt.decode(token, SECRET_KEY, ['HS256'])

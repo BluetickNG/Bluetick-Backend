@@ -14,7 +14,7 @@ class User(models.Model):
     is_admin = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
     is_super = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=True)
 
     domain = models.TextField()
 
@@ -34,3 +34,11 @@ class Log(models.Model):
     location = models.TextField()
     user = User
     data = models.TextField()
+    
+
+class Notifications(models.Model):
+    sent_at = models.DateTimeField(auto_now = True)
+    message = models.TextField()
+    user = User
+    employee_id = User.email
+
