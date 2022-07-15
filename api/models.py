@@ -6,6 +6,7 @@ class User(models.Model):
     first_name = models.CharField(max_length=25)
     last_name = models.CharField(max_length=25)
     middle_name = models.CharField(max_length=25)
+    # department = models.CharField(max_length=25)
 
     email = models.CharField(max_length=50, unique=True)
     password = models.BinaryField()
@@ -36,9 +37,21 @@ class Log(models.Model):
     data = models.TextField()
     
 
-class Notifications(models.Model):
-    sent_at = models.DateTimeField(auto_now = True)
-    message = models.TextField()
-    user = User
-    employee_id = User.email
+class Domain(models.Model):
+    company_name = models.CharField(max_length=100, unique=True)
+    company_email = models.CharField(max_length=100, unique=True)
+    company_phone = models.CharField(max_length=100)
+    password = models.BinaryField()
+
+    created_at = models.DateTimeField(auto_now=True)
+
+    is_admin = models.BooleanField(default=True)
+
+
+
+# class Notifications(models.Model):
+#     sent_at = models.DateTimeField(auto_now = True)
+#     message = models.TextField()
+#     user = User
+#     employee_id = User.email
 

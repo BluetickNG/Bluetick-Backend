@@ -9,7 +9,7 @@ import jwt
 
 from django.views.decorators.csrf import csrf_exempt
 
-from .models import User
+from .models import Domain, User
 
 # Create your views here.
 
@@ -68,6 +68,58 @@ def login(request):
     except ObjectDoesNotExist:
         print("User record not found")
         return JsonResponse({"message": "User not found"}, status=404)
+
+
+@csrf_exempt
+def createworkspace(request):
+    if request.method != 'POST':
+        return JsonResponse({"message": "Method not allowed"}, status=405)
+
+    email = request.POST.get('email')
+    password = request.POST.get('password')
+    workspace_name = request.POST.get('workspace_name')
+    phone = request.POST.get('phone')
+
+    user = Domain()
+    user.company_email = email
+    user.password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+    user.company_name = workspace_name
+    user.company_phone = phone
+
+    json_data = {
+        "user": user.id,
+        "exp": (datetime.now() + timedelta(hours=1))
+    }
+
+    token = jwt.encode(payload=json_data, key=SECRET_KEY, algorithm="HS256")
+    user.save()
+
+    # link = "http://localhost:8000/api/signup " 
+
+    return JsonResponse({
+        "message": "Workspace created",
+        "token": token,
+        # "link": link
+    },
+                        status=200)
+
+@csrf_exempt   # This is to disable the CSRF protection
+def generateLink(request):
+
+
+    json_data = {
+                # "user": user.id,
+                "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
+            }
+
+    token = jwt.encode(json_data, SECRET_KEY)
+
+    link = "http://localhost:8000/api/signup " + token
+
+    return JsonResponse({ 
+        "token": token,
+        "link": link,
+    })
 
 
 @csrf_exempt
