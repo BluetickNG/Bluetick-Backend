@@ -152,7 +152,9 @@ def index(request):
 @csrf_exempt
 def login(request):
     if request.method != 'POST':
-        return HttpResponseBadRequest()
+        return JsonResponse({
+            "message": "Method not allowed"
+        }, status = 405)
 
     email = request.POST.get('email')
     password = request.POST.get('password')

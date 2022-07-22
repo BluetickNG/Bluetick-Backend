@@ -49,7 +49,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'django_otp',
-    # 'rest_framework'
+    'rest_framework',
+    'drf_yasg',
+
 ]
 
 MIDDLEWARE = [
