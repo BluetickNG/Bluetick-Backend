@@ -2,6 +2,7 @@ from __future__ import print_function
 from datetime import datetime, timedelta, timezone
 import email
 from email import message
+from os import environ
 from django.http import Http404, HttpResponseForbidden, HttpResponseNotFound
 from django.shortcuts import render
 from django.http.response import JsonResponse, HttpResponse,HttpResponseBadRequest
@@ -95,7 +96,7 @@ class TOTPVerification:
                 # was less than last verified counter, then return False
                 self.verified = False
         return self.verified
-SECRET_KEY='omo'
+SECRET_KEY= 'omo'
 toke = TOTPVerification()
 @csrf_exempt
 def token_generation(email):
