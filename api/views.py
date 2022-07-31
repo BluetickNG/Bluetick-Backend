@@ -7,6 +7,7 @@ from django.http import Http404, HttpResponseForbidden, HttpResponseNotFound
 from django.shortcuts import render
 from django.http.response import JsonResponse, HttpResponse,HttpResponseBadRequest
 from django.core.exceptions import ObjectDoesNotExist
+from django.contrib.auth.decorators import login_required
 
 import bcrypt
 import jwt
@@ -201,12 +202,25 @@ def createworkspace(request):
     workspace_name = request.POST.get('workspace_name')
     phone = request.POST.get('phone')
 
+    # ensure user inputs all required fields
+    if email is None or password1 is None or workspace_name is None or phone is None:
+        return JsonResponse({"message": "Missing required fields"}, status=400)
+    
     user = Domain()
+
+    # check if email already exists
+    if email in Domain.objects.values_list('company_email', flat=True):
+        return JsonResponse({"message": "Email already exists"}, status=400)
+
+    # check if workspace name already exists
+    if workspace_name in Domain.objects.values_list('company_name', flat=True):
+        return JsonResponse({"message": "Workspace name already exists"},status=400)
     user.company_email = email
     user.password = bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())
     user.company_name = workspace_name
     user.company_phone = phone
 
+    # return JsonResponse({"message": "Workspace created"}, status=200)
     # return JsonResponse({"message": "Workspace created"})
     # json_data = {
     #     "user": user.id,
@@ -300,6 +314,9 @@ def signup(request):
 
     full_name = request.POST.get('full_name')
     role = request.POST.get('role')
+
+    if email == None or password1 == None or full_name == None or role == None:
+        return JsonResponse({"message": "Missing required fields"}, status=400)
     # last_name = request.POST.get('last_name')
     # middle_name = request.POST.get('middle_name')
 
@@ -308,6 +325,9 @@ def signup(request):
 
     # try:
     user = User()
+    if email in User.objects.values_list('email', flat=True):
+        return JsonResponse({"message": "Email already exists"}, status=400)
+    
 
     user.email = email
     user.password = bcrypt.hashpw(password1.encode('utf-8'),
@@ -487,3 +507,9 @@ def reset_verify(request):
 # if __name__ == '__main__':
 #     gmail_create_draft()
 
+def getusers(request):
+    users = User.objects.values_list('email', flat=True)
+    workspace = Domain.objects.all()
+    # print(users)
+    return JsonResponse({"users": users}, status=200)
+    return JsonResponse({"message": "User created"})

@@ -12,5 +12,6 @@ urlpatterns = [
     path('verify', views.token_verify),
     path('reset', views.resetpassword),
     path('reset_ver', views.reset_verify),
+    path('user', views.getusers),
 
 ]

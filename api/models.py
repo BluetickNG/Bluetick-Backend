@@ -4,8 +4,8 @@ from django.db import models
 
 class User(models.Model):
     full_name = models.CharField(max_length=250, null=True)
-    role = models.CharField(max_length=25)
-    email = models.CharField(max_length=50, unique=True)
+    role = models.CharField(max_length=50)
+    email = models.CharField(max_length=225, unique=True)
     password = models.BinaryField()
 
     is_admin = models.BooleanField(default=False)
