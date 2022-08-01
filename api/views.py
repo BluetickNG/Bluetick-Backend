@@ -38,6 +38,8 @@ from django_otp.oath import TOTP
 from django_otp.util import random_hex
 from unittest import mock
 import time
+from itertools import chain
+
 # Create your views here.
 
 class TOTPVerification:
@@ -197,10 +199,24 @@ def createworkspace(request):
     email = request.POST.get('email')
     password1 = request.POST.get('password1')
     password2 = request.POST.get('password2')
+
+    workspace = Domain.objects.values_list('company_email', flat=True)
+    if email in workspace:
+        return JsonResponse({"message": "Email already exists"}, status=400)
+
+    
+
     if password1 != password2:
         return JsonResponse({"message": "Passwords do not match"}, status=400)
     workspace_name = request.POST.get('workspace_name')
+
+
     phone = request.POST.get('phone')
+    
+
+    work_name = Domain.objects.values_list('company_name', flat=True)
+    if workspace_name in work_name:
+        return JsonResponse({"message": "Workspace name already exists"}, status=400)
 
     # ensure user inputs all required fields
     if email is None or password1 is None or workspace_name is None or phone is None:
@@ -509,7 +525,10 @@ def reset_verify(request):
 
 def getusers(request):
     users = User.objects.values_list('email', flat=True)
-    workspace = Domain.objects.all()
+    workspace = Domain.objects.values_list('company_email', flat=True)
     # print(users)
-    return JsonResponse({"users": users}, status=200)
+    all_users = list(chain(users))
+    print(all_users)
+    all_workspace = list(chain(workspace))
+    return JsonResponse({"all_users": all_users, "all_workspace": all_workspace},  status=200)
     return JsonResponse({"message": "User created"})
