@@ -535,7 +535,7 @@ def reset_verify(request):
         },status=400)
 
     # return JsonResponse({"message": "Token verified"})
-
+@csrf_exempt
 def reset_password(request):
     if request.method != 'POST':
         return JsonResponse({"message": "Invalid Method. Not Allowed"},

@@ -13,5 +13,6 @@ urlpatterns = [
     path('reset', views.resetpassword),
     path('reset_ver', views.reset_verify),
     path('user', views.getusers),
+    path('reset_password', views.reset_password),
 
 ]
