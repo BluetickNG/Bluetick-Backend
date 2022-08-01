@@ -165,6 +165,19 @@ def login(request):
     # return JsonResponse({
     #     "omo": "user"
     # })
+    if email is None or password is None:
+        return JsonResponse({
+            "message": "Missing credentials"
+        }, status = 400)
+
+    # get all the users by email
+    user_email_list = User.objects.values_list('email', flat=True)
+    workspace_email_list = Domain.objects.values_list('company_email', flat=True)
+
+    if email not in user_email_list or email not in workspace_email_list:
+        return JsonResponse({
+            "message": "Invalid credentials"
+        }, status = 401)
     try:
         user = User.objects.get(email=email)
         result = bcrypt.checkpw(password.encode('utf-8'), user.password)
@@ -212,7 +225,7 @@ def createworkspace(request):
 
 
     phone = request.POST.get('phone')
-    
+
 
     work_name = Domain.objects.values_list('company_name', flat=True)
     if workspace_name in work_name:
