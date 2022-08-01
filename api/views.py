@@ -349,6 +349,14 @@ def signup(request):
     # last_name = request.POST.get('last_name')
     # middle_name = request.POST.get('middle_name')
 
+    # check if email already exists
+    if email in User.objects.values_list('email', flat=True):
+        return JsonResponse({"message": "Email already exists"}, status=400)
+
+    # check if full_name already exists
+    if full_name in User.objects.values_list('full_name', flat=True):
+        return JsonResponse({"message": "Full name already exists"}, status=400)
+
     # domain = request.POST.get('domain')
     domain = 'startup'
 
@@ -527,6 +535,30 @@ def reset_verify(request):
         },status=400)
 
     # return JsonResponse({"message": "Token verified"})
+
+def reset_password(request):
+    if request.method != 'POST':
+        return JsonResponse({"message": "Invalid Method. Not Allowed"},
+                            status=400)
+    email = request.POST.get('email')
+    password1 = request.POST.get('password')
+    password2 = request.POST.get('password2')
+
+    if password1 != password2:
+        return JsonResponse({"message": "Passwords do not match"},
+                            status=400)
+    
+    user = User.objects.get(email=email)
+
+    if user:
+        user.password = bcrypt.hashpw(password1.encode('utf-8'),
+                                            bcrypt.gensalt())
+        user.save()
+        return JsonResponse({"message": "Password reset successfully"},
+                            status=200)
+    else:
+        return JsonResponse({"message": "User not found"},
+                            status=404)
     
 
 
