@@ -4,6 +4,12 @@ from django.shortcuts import render
 from django.http.response import JsonResponse, HttpResponse,HttpResponseBadRequest
 from django.core.exceptions import ObjectDoesNotExist
 
+from rest_framework import generics
+from rest_framework_simplejwt.tokens import RefreshToken
+from .utils import Util
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+
 import bcrypt
 import jwt
 
@@ -113,3 +119,32 @@ def signup(request):
                         status=200)
     # except:
     #     return JsonResponse({"message": "An error occurred"}, status=500)
+
+
+def InvitationLinkTest(request):
+    if request.method != 'POST':
+        return JsonResponse({"message": "Invalid Method. Not Allowed"},
+                            status=400)
+
+    email = request.POST.get('email')
+    user = User.objects.get(email=email)
+
+    token = RefreshToken.for_user(user).access_token
+
+    current_site = get_current_site(request)
+    relativeLink = reverse('email-verify')
+
+    absurl = 'https://'+current_site+relativeLink+"?token="+str(token)
+    email_body = 'Hi '+user.username+'Use link below to verify your email \n'+ absurl
+    data = {'email_body':email_body, 'to_email':user.email, 'email_subject': 'Verify your email'}
+
+    Util.send_email(data)
+
+    return JsonResponse({
+                "message": "Login successful",
+                "token": token
+            })
+
+class VerifyEmail(generics.GenericAPIView):
+    def get(self):
+        pass
