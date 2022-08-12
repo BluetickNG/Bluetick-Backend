@@ -9,6 +9,14 @@ from django.http.response import JsonResponse, HttpResponse,HttpResponseBadReque
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 
+from rest_framework import generics
+from rest_framework_simplejwt.tokens import RefreshToken
+from .utils import Util
+from django.contrib.sites.shortcuts import get_current_site
+from django.urls import reverse
+from django.conf import settings
+
+
 import bcrypt
 import jwt
 
@@ -577,3 +585,45 @@ def getusers(request):
     all_workspace = list(chain(workspace))
     return JsonResponse({"all_users": all_users, "all_workspace": all_workspace},  status=200)
     return JsonResponse({"message": "User created"})
+
+@csrf_exempt
+def ActivationLinkTest(request):
+    if request.method != 'POST':
+        return JsonResponse({"message": "Invalid Method. Not Allowed"},
+                            status=400)
+
+    email = request.POST.get('email')
+    # user = User.objects.get(email=email)
+    user = User.objects.get(email=email)
+
+    token = RefreshToken.for_user(user).access_token
+
+    current_site = get_current_site(request).domain
+    relativeLink = reverse('activation-link')
+
+    absurl = 'https://'+current_site+relativeLink+"?token="+str(token)
+    email_body = 'Hi '+user.full_name+' Use link below to verify your email \n'+ absurl
+    data = {'email_body':email_body, 'to_email':user.email, 'email_subject': 'Verify your email'}
+
+    Util.send_email(data)
+
+    return HttpResponse("Good")
+
+
+
+class VerifyEmail(generics.GenericAPIView):
+    def get(self, request):
+        token = request.GET.get('token')
+        try:
+            payload = jwt.decode(token, settings.SECRET_KEY)
+            user = User.objects.get(id=payload('user_id'))
+
+            user.is_verified = True
+            user.save()
+
+            return HttpResponse("Account Successfully Verified")
+            
+        except jwt.ExpiredSignatureError as identifier:
+            return HttpResponse("Activation link already expired")
+        except jwt.exceptions.DecodeError as identifier:
+            return HttpResponse("invalid Token")

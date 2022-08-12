@@ -164,12 +164,12 @@ django_heroku.settings(locals())
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-DEBUG = False
+DEBUG = True
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.mailtrap.io'
-EMAIL_HOST_USER = '80aa4750f2dc5d'
-EMAIL_HOST_PASSWORD = '1f5c255685386e'
+EMAIL_HOST_USER = 'c3c5776138b9b0'
+EMAIL_HOST_PASSWORD = 'ad541569a667ab'
 EMAIL_PORT = '2525'
 
 # recipient email 
