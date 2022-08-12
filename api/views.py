@@ -39,6 +39,7 @@ from django_otp.util import random_hex
 from unittest import mock
 import time
 from itertools import chain
+import json
 
 # Create your views here.
 
@@ -100,7 +101,10 @@ class TOTPVerification:
                 self.verified = False
         return self.verified
 SECRET_KEY= 'omo'
+
 toke = TOTPVerification()
+
+
 @csrf_exempt
 def token_generation(email):
     """generate the token and send it to the user"""
@@ -159,8 +163,11 @@ def login(request):
             "message": "Method not allowed"
         }, status = 405)
 
-    email = request.POST.get('email')
-    password = request.POST.get('password')
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+
+    email = body['email']
+    password = body['password']
 
     # return JsonResponse({
     #     "omo": "user"
@@ -202,16 +209,22 @@ def login(request):
     except ObjectDoesNotExist:
         print("User record not found")
         return JsonResponse({"message": "User not found"}, status=404)
-
 # signing up a new workspace
 @csrf_exempt
 def createworkspace(request):
     if request.method != 'POST':
         return JsonResponse({"message": "Method not allowed"}, status=405)
 
-    email = request.POST.get('email')
-    password1 = request.POST.get('password1')
-    password2 = request.POST.get('password2')
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    # content = body['email']
+    # return JsonResponse({"email": content})
+
+    
+
+    email = body['email']
+    password1 = body['password1']
+    password2 = body['password2']
 
     workspace = Domain.objects.values_list('company_email', flat=True)
     if email in workspace:
@@ -221,10 +234,10 @@ def createworkspace(request):
 
     if password1 != password2:
         return JsonResponse({"message": "Passwords do not match"}, status=400)
-    workspace_name = request.POST.get('workspace_name')
+    workspace_name = body['workspace_name']
 
 
-    phone = request.POST.get('phone')
+    phone = body['phone']
 
 
     work_name = Domain.objects.values_list('company_name', flat=True)
@@ -232,8 +245,8 @@ def createworkspace(request):
         return JsonResponse({"message": "Workspace name already exists"}, status=400)
 
     # ensure user inputs all required fields
-    if email is None or password1 is None or workspace_name is None or phone is None:
-        return JsonResponse({"message": "Missing required fields"}, status=400)
+    # if email is None or password1 is None or workspace_name is None or phone is None:
+    #     return JsonResponse({"message": "Missing required fields"}, status=400)
     
     user = Domain()
 
@@ -334,15 +347,19 @@ def signup(request):
         return JsonResponse({"message": "Invalid Method. Not Allowed"},
                             status=400)
 
-    email = request.POST.get('email')
-    password1 = request.POST.get('password1')
-    password2 = request.POST.get('password2')
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+
+
+    email = body['email']
+    password1 = body['password1']
+    password2 = body['password2']
     if password1 != password2:
         return JsonResponse({"message": "Passwords do not match"}, status=400)
     # username = request.POST.get('username')
 
-    full_name = request.POST.get('full_name')
-    role = request.POST.get('role')
+    full_name = body['full_name']
+    role = body['role']
 
     if email == None or password1 == None or full_name == None or role == None:
         return JsonResponse({"message": "Missing required fields"}, status=400)
@@ -402,7 +419,11 @@ def resetpassword(request):
     if request.method != 'POST':
         return JsonResponse({"message": "Invalid Method. Not Allowed"},
                             status=400)
-    email = request.POST.get('email')
+
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+
+    email = body['email']
 
     user = User.objects.get(email=email)
 
@@ -508,7 +529,11 @@ def token_verify(request):
     if request.method != 'POST':
         return JsonResponse({"message": "Invalid Method. Not Allowed"},
                             status=400)
-    token = request.POST.get('token')
+                
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+
+    token = body['token']
     if toke.verify_token(token):
         return JsonResponse({
             "message": "Token verified"
@@ -523,7 +548,11 @@ def reset_verify(request):
     if request.method != 'POST':
         return JsonResponse({"message": "Invalid Method. Not Allowed"},
                             status=400)
-    token = request.POST.get('token')
+
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+
+    token = body['token']
     if reset.verify_token(token):
         
         return JsonResponse({
@@ -540,9 +569,13 @@ def reset_password(request):
     if request.method != 'POST':
         return JsonResponse({"message": "Invalid Method. Not Allowed"},
                             status=400)
-    email = request.POST.get('email')
-    password1 = request.POST.get('password')
-    password2 = request.POST.get('password2')
+
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+
+    email = body['email']
+    password1 = body['password']
+    password2 = body['password2']
 
     if password1 != password2:
         return JsonResponse({"message": "Passwords do not match"},
@@ -576,4 +609,3 @@ def getusers(request):
     print(all_users)
     all_workspace = list(chain(workspace))
     return JsonResponse({"all_users": all_users, "all_workspace": all_workspace},  status=200)
-    return JsonResponse({"message": "User created"})
