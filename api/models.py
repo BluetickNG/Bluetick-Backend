@@ -64,9 +64,12 @@ class Domain(models.Model):
 
 
 # model for invitatoin link part
-# class invitation(models.Model):
-#     invitation_link = models.CharField(max_length=250, unique=True)
-#     email = models.EmailField(max_length=50)
+class invitation(models.Model):
+    email = models.EmailField(max_length=50)
+    invitation_link = models.CharField(max_length=250, unique=True)
+
+
+
 
 class token(models.Model):
     otp = models.CharField(max_length=250, unique=True)

@@ -3,6 +3,7 @@ from datetime import datetime, timedelta, timezone
 import email
 from email import message
 from os import environ
+from telnetlib import STATUS
 from django.http import Http404, HttpResponseForbidden, HttpResponseNotFound
 from django.shortcuts import render
 from django.http.response import JsonResponse, HttpResponse,HttpResponseBadRequest
@@ -16,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 # from bluetick.settings import RECIPIENT_ADDRESS
 
-from .models import Domain, User
+from .models import Domain, User, invitation
 import random
 
 from django.core.mail import send_mail
@@ -339,6 +340,71 @@ def generateLink(request):
         "token": token,
         "link": link,
     })
+
+
+# signup a new staff and verify invitation link
+@csrf_exempt
+def signemail(request):
+    if request.method != 'POST':
+        return JsonResponse({"message": "Invalid Method. Not Allowed"}, status = 400)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+
+    email = body["email"]
+    invitation_link = body["invitation_link"]
+
+    emails_sent= invitation.objects.values_list('email', flat=True)
+    all_sent = list(chain(emails_sent))
+
+    if email not in all_sent:
+        return JsonResponse({"message":"You have not been invited"})
+
+    user = invitation.objects.get(email=email)
+    if user.invitation_link != invitation_link:
+        return JsonResponse({"message":"invalid invitation link"}, status=403)
+    else:
+        user.delete()
+        # delete the user and the link
+    return JsonResponse({"message":"link correct"})
+
+
+
+    #TODO: create a new table that stores the invitation link with the corresponding email and check it with "signemail" funciton
+@csrf_exempt
+def addmem(request):
+    if request.method != 'POST':
+        return JsonResponse({"message":"Invalid Method"}, status = 400)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+
+    email_list = body["email_list"]
+
+    print(email_list)
+
+    invitee = invitation()
+
+    for email in email_list:
+        new_toke = TOTPVerification
+        token = new_toke.generate_token()
+
+        link ='Copy the invitation link below\n'+'https://'+email+'/?='+token
+
+
+        invitee.email = email
+        invitee.invitation_link = link
+
+        invitee.save()
+
+        send_mail(
+            subject="Invitation to Join Workspace",
+            message=link,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email])
+
+    # for each member on the email list generate a special token and add something then save it in the database
+    # Then send it to the email
+    return JsonResponse({"message": "member added"})
+
 
 # signup as a new user ie not admin/ workspace
 @csrf_exempt

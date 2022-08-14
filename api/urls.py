@@ -14,5 +14,7 @@ urlpatterns = [
     path('reset_ver', views.reset_verify),
     path('user', views.getusers),
     path('reset_password', views.reset_password),
+    path('addmem', views.addmem),
+    path('signemail', views.signemail),
 
 ]
