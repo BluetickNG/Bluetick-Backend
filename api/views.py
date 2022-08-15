@@ -179,13 +179,13 @@ def login(request):
         }, status = 400)
 
     # get all the users by email
-    user_email_list = User.objects.values_list('email', flat=True)
-    workspace_email_list = Domain.objects.values_list('company_email', flat=True)
+    # user_email_list = User.objects.values_list('email', flat=True)
+    # workspace_email_list = Domain.objects.values_list('company_email', flat=True)
 
-    if email not in user_email_list or email not in workspace_email_list:
-        return JsonResponse({
-            "message": "Invalid credentials"
-        }, status = 401)
+    # if email not in User.objects.values_list('email', flat=True) or email not in Domain.objects.values_list('company_email', flat=True):
+    #     return JsonResponse({
+    #         "message": "Invalid credentials"
+    #     }, status = 401)
     try:
         user = User.objects.get(email=email)
         result = bcrypt.checkpw(password.encode('utf-8'), user.password)
@@ -353,13 +353,19 @@ def signemail(request):
     email = body["email"]
     invitation_link = body["invitation_link"]
 
+
     emails_sent= invitation.objects.values_list('email', flat=True)
     all_sent = list(chain(emails_sent))
+
+    # print(all_sent)
 
     if email not in all_sent:
         return JsonResponse({"message":"You have not been invited"})
 
     user = invitation.objects.get(email=email)
+    print(user)
+
+    return JsonResponse({"message":"hello"})
     if user.invitation_link != invitation_link:
         return JsonResponse({"message":"invalid invitation link"}, status=403)
     else:
@@ -370,25 +376,30 @@ def signemail(request):
 
 
     #TODO: create a new table that stores the invitation link with the corresponding email and check it with "signemail" funciton
+
 @csrf_exempt
 def addmem(request):
     if request.method != 'POST':
         return JsonResponse({"message":"Invalid Method"}, status = 400)
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
-
     email_list = body["email_list"]
 
     print(email_list)
 
-    invitee = invitation()
+    
 
     for email in email_list:
-        new_toke = TOTPVerification
+        print("hello")
+        
+        new_toke = TOTPVerification()
         token = new_toke.generate_token()
+        print(token)
 
-        link ='Copy the invitation link below\n'+'https://'+email+'/?='+token
+        body = 'Copy the invitation link below\n'
+        link ='https://'+email+'/?='+token
 
+        invitee = invitation()
 
         invitee.email = email
         invitee.invitation_link = link
@@ -397,13 +408,13 @@ def addmem(request):
 
         send_mail(
             subject="Invitation to Join Workspace",
-            message=link,
+            message=body + link,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[email])
 
-    # for each member on the email list generate a special token and add something then save it in the database
-    # Then send it to the email
-    return JsonResponse({"message": "member added"})
+    # # for each member on the email list generate a special token and add something then save it in the database
+    # # Then send it to the email
+    return JsonResponse({"message":"member added"})  
 
 
 # signup as a new user ie not admin/ workspace
@@ -485,12 +496,15 @@ def resetpassword(request):
     if request.method != 'POST':
         return JsonResponse({"message": "Invalid Method. Not Allowed"},
                             status=400)
+    return JsonResponse({"message": "Missing required fields"})
 
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
 
     email = body['email']
-
+    print(type(email))
+    # if email == None:
+    
     user = User.objects.get(email=email)
 
     if user:
