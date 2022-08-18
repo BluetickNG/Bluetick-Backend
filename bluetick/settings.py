@@ -172,5 +172,19 @@ EMAIL_HOST_USER = '80aa4750f2dc5d'
 EMAIL_HOST_PASSWORD = '1f5c255685386e'
 EMAIL_PORT = '2525'
 
+# EMAIL_BACK_END = 'django.core.mail.backends.smtp.EmailBackend'
+# EMAIL_HOST = 'smtp-mail.outlook.com'
+# EMAIL_HOST_USER = 'fikayobluetick@outlook.com'
+# EMAIL_HOST_PASSWORD = 'F1k@y0m11'
+# EMAIL_PORT = 25
+# EMAIL_USE_TLS = True
+# EMAIL_USE_SSL = False
+
+# EMAIL_USE_TLS = True
+# EMAIL_HOST = 'smtp.live.com'
+# EMAIL_HOST_USER = 'my_email@outlook.com'
+# EMAIL_HOST_PASSWORD = 'my_password'
+# EMAIL_PORT = 587
+
 # recipient email 
 # RECIPIENT_ADDRESS = env('RECIPIENT_ADDRESS')

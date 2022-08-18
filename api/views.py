@@ -376,7 +376,7 @@ def signemail(request):
 
 
     #TODO: create a new table that stores the invitation link with the corresponding email and check it with "signemail" funciton
-
+from django.core.mail import EmailMessage
 @csrf_exempt
 def addmem(request):
     if request.method != 'POST':
@@ -405,12 +405,22 @@ def addmem(request):
         invitee.invitation_link = link
 
         invitee.save()
+        print(link)
 
         send_mail(
             subject="Invitation to Join Workspace",
             message=body + link,
             from_email=settings.EMAIL_HOST_USER,
             recipient_list=[email])
+
+        # email = EmailMessage(
+        #     subject="Invitation to Join Workspace",
+        #     body=body + link,
+        #     from_email=settings.EMAIL_HOST_USER,
+        #     to=[email]
+        # )
+        # email.send()
+        print("sent")
 
     # # for each member on the email list generate a special token and add something then save it in the database
     # # Then send it to the email
