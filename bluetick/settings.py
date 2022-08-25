@@ -14,7 +14,7 @@ from pathlib import Path
 import django_heroku
 import os
 import environ
-import cloudinary_storage
+# import cloudinary_storage
 
 env = environ.Env()
 environ.Env.read_env()
