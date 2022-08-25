@@ -14,7 +14,7 @@ from pathlib import Path
 import django_heroku
 import os
 import environ
-import cloudinary_storage
+# import cloudinary_storage
 
 env = environ.Env()
 environ.Env.read_env()
@@ -41,8 +41,8 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'api',
     'chat',
-    'cloudinary_storage',
-    'cloudinary',
+    # 'cloudinary_storage',
+    # 'cloudinary',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -52,7 +52,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'channels',
     'django_otp',
-    'rest_framework',
+    # 'rest_framework',
     'drf_yasg',
 
 ]
