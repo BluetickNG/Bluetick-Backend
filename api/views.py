@@ -363,19 +363,23 @@ def signemail(request):
 
     if email not in all_sent:
         return JsonResponse({"message":"You have not been invited"})
+    try:
+        user = invitation.objects.get(email=email)
+    except Exception as e:
+        print(e)
+    # print(user)
+    print(user.email)
 
-    user = invitation.objects.filter(email=email)
-    print(user)
-    # print(user.email)
-
-    return JsonResponse({"message":"hello"})
-    if user.invitation_link != invitation_link:
-        return JsonResponse({"message":"invalid invitation link"}, status=403)
-    else:
-        user.delete()
-        # delete the user and the link
-    return JsonResponse({"message":"link correct"})
-
+    # return JsonResponse({"message":"hello"})
+    try:
+        if user.invitation_link != invitation_link:
+            return JsonResponse({"message":"invalid invitation link"}, status=403)
+        else:
+            user.delete()
+            # delete the user and the link
+        return JsonResponse({"message":"link correct"})
+    except Exception as e:
+        print(e)
 
 
     #TODO: create a new table that stores the invitation link with the corresponding email and check it with "signemail" funciton
@@ -391,6 +395,7 @@ def addmem(request):
     print(email_list)
 
     
+    # return JsonResponse({"message":"rest"})
 
     for email in email_list:
         print("hello")
@@ -402,16 +407,30 @@ def addmem(request):
         body = 'Copy the invitation link below\n'
         link ='https://'+email+'/?='+token
         
+        # try:
+        user = invitation.objects.filter(email=email).exists()
+        print(user)
+        # except Exception as e:
+        #     print(e)
 
-        invitee = invitation()
 
-        invitee.email = email
-        invitee.invitation_link = link
-        invitee.workspacename = workspacename
+        # return JsonResponse({"message":"rest"}) 
+        try:
+            if user:
+                us = invitation.objects.filter(email=email).update(invitation_link = link)
+                if us == 1:
+                    print("updated")
+            else:
+                invitee = invitation()
 
-        invitee.save()
-        print(link)
+                invitee.email = email
+                invitee.invitation_link = link
+                invitee.workspacename = workspacename
 
+                invitee.save()
+                print(link)
+        except Exception as e:
+            print(e)
         try:
             send_mail(
                 subject="Invitation to Join Workspace",
@@ -750,11 +769,14 @@ def getusers(request):
     all_workspace = list(chain(workspace))
     return JsonResponse({"all_users": all_users, "all_workspace": all_workspace},  status=200)
 
-
 @csrf_exempt
 def work_log(request):
+
     if request.method != 'POST':
+
         body = json.loads(request.body.decode('utf-8'))
 
         email = body['email']
         hours = body['work_hours']
+
+

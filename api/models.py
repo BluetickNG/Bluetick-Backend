@@ -59,6 +59,7 @@ class Domain(models.Model):
     company_email = models.EmailField(max_length=100, unique=True)
     company_phone = models.CharField(max_length=100)
     password = models.BinaryField()
+    # verified = models.BooleanField()
 
     created_at = models.DateTimeField(auto_now=True)
 
