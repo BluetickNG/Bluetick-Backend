@@ -1,3 +1,4 @@
+from email.policy import default
 from django.db import models
 
 # Create your models here.
@@ -7,6 +8,7 @@ class User(models.Model):
     role = models.CharField(max_length=50)
     email = models.CharField(max_length=225, unique=True)
     password = models.BinaryField()
+    profile_img = models.ImageField(upload_to='profile_img', default = 'blank-profile-picture.png')
 
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=True)
@@ -67,6 +69,7 @@ class Domain(models.Model):
 class invitation(models.Model):
     email = models.EmailField(max_length=50)
     invitation_link = models.CharField(max_length=250, unique=True)
+    workspacename = models.CharField(max_length=250 )
 
 
 

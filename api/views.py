@@ -42,6 +42,8 @@ import time
 from itertools import chain
 import json
 
+from django.core.mail import EmailMessage
+
 # Create your views here.
 
 class TOTPVerification:
@@ -59,7 +61,7 @@ class TOTPVerification:
         # number of digits in a token. Default is 6
         self.number_of_digits = 6
         # validity period of a token. Default is 30 second.
-        self.token_validity_period = 120
+        self.token_validity_period = 350
 
     def totp_obj(self):
         # create a TOTP object
@@ -362,8 +364,9 @@ def signemail(request):
     if email not in all_sent:
         return JsonResponse({"message":"You have not been invited"})
 
-    user = invitation.objects.get(email=email)
+    user = invitation.objects.filter(email=email)
     print(user)
+    # print(user.email)
 
     return JsonResponse({"message":"hello"})
     if user.invitation_link != invitation_link:
@@ -376,7 +379,6 @@ def signemail(request):
 
 
     #TODO: create a new table that stores the invitation link with the corresponding email and check it with "signemail" funciton
-from django.core.mail import EmailMessage
 @csrf_exempt
 def addmem(request):
     if request.method != 'POST':
@@ -384,6 +386,7 @@ def addmem(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
     email_list = body["email_list"]
+    workspacename = body["workspacename"]
 
     print(email_list)
 
@@ -398,20 +401,25 @@ def addmem(request):
 
         body = 'Copy the invitation link below\n'
         link ='https://'+email+'/?='+token
+        
 
         invitee = invitation()
 
         invitee.email = email
         invitee.invitation_link = link
+        invitee.workspacename = workspacename
 
         invitee.save()
         print(link)
 
-        send_mail(
-            subject="Invitation to Join Workspace",
-            message=body + link,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[email])
+        try:
+            send_mail(
+                subject="Invitation to Join Workspace",
+                message=body + link,
+                from_email=settings.EMAIL_HOST_USER,
+                recipient_list=[email])
+        except Exception as e:
+            print(e)
 
         # email = EmailMessage(
         #     subject="Invitation to Join Workspace",
@@ -624,6 +632,9 @@ def token_verify(request):
     body = json.loads(body_unicode)
 
     token = body['token']
+    # print(token)
+    # add if the user is verified or not in the database
+    email = body['email']
     if toke.verify_token(token):
         return JsonResponse({
             "message": "Token verified"
@@ -663,22 +674,61 @@ def reset_password(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
 
-    email = body['email']
+    email_ad = body['email']
+
+    # print(type(email_ad))
+    # print(email_ad)
+    # user = User.objects.get(email=email_ad)
+
+
     password1 = body['password']
     password2 = body['password2']
 
     if password1 != password2:
         return JsonResponse({"message": "Passwords do not match"},
-                            status=400)
+                            status=400) 
     
-    user = User.objects.get(email=email)
+    # check if the email is in the user table
+    work = Domain.objects.filter(company_email=email_ad).exists()
+    # print(work)
 
+
+    user = User.objects.filter(email = email_ad).exists()
+    # print(user)
+    
+    
+    
+
+    # return JsonResponse({"message": "Password reset successfully"})
+    # print(type(user))
+    # check if the user is in the workspace(domain) table
     if user:
-        user.password = bcrypt.hashpw(password1.encode('utf-8'),
-                                            bcrypt.gensalt())
-        user.save()
+        us = User.objects.filter(email=email_ad).update(password = (bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
+        # us.password = bcrypt.hashpw(password1.encode('utf-8'),
+        #                                     bcrypt.gensalt())
+        if us == 1:
+            return JsonResponse({"message": "Password reset successfully"}, status=200)
+        else:
+            return JsonResponse({"message":"Password update unsuccessful"})
+        
+
+        # try:
+        #     us.save()
+        # except Exception as e:
+        #     print(e)
+        # print(user.password)
         return JsonResponse({"message": "Password reset successfully"},
                             status=200)
+    elif work:
+        wp = Domain.objects.filter(company_email = email_ad).update(password=(bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
+        # work.password = bcrypt.hashpw(password1.encode('utf-8'),
+        #                                     bcrypt.gensalt())
+        # work.save()
+        if wp == 1:
+            return JsonResponse({"message": "Password reset successfully"},
+                            status=200)
+        else:
+            return JsonResponse({"message":"Password update unsuccessful"})
     else:
         return JsonResponse({"message": "User not found"},
                             status=404)
@@ -699,3 +749,12 @@ def getusers(request):
     print(all_users)
     all_workspace = list(chain(workspace))
     return JsonResponse({"all_users": all_users, "all_workspace": all_workspace},  status=200)
+
+
+@csrf_exempt
+def work_log(request):
+    if request.method != 'POST':
+        body = json.loads(request.body.decode('utf-8'))
+
+        email = body['email']
+        hours = body['work_hours']

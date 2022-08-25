@@ -14,6 +14,7 @@ from pathlib import Path
 import django_heroku
 import os
 import environ
+import cloudinary_storage
 
 env = environ.Env()
 environ.Env.read_env()
@@ -40,6 +41,8 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'api',
     'chat',
+    'cloudinary_storage',
+    'cloudinary',
 
     'django.contrib.admin',
     'django.contrib.auth',
@@ -162,7 +165,24 @@ REST_FRAMEWORK = {
 # Activate Django-Heroku.
 django_heroku.settings(locals())
 
+STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'dg4zlcau8',
+    'API_KEY': '752888975244224',
+    'API_SECRET': 'ph_eIo43UWvPmiToF2pj8Tq-aXs'
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 DEBUG = False
 
