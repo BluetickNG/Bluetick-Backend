@@ -41,7 +41,7 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'api',
     'chat',
-    'cloudinary_storage',
+    # 'cloudinary_storage',
     'cloudinary',
 
     'django.contrib.admin',
