@@ -122,7 +122,7 @@ def token_generation(email):
     send_mail(
         'Bluetick',
         'token: ' + generate_token,
-        'fikayodan@gmail.com',
+        settings.EMAIL_HOST_USER,
         [email],
         fail_silently=False,
     )
@@ -265,14 +265,7 @@ def createworkspace(request):
     user.company_name = workspace_name
     user.company_phone = phone
 
-    # return JsonResponse({"message": "Workspace created"}, status=200)
-    # return JsonResponse({"message": "Workspace created"})
-    # json_data = {
-    #     "user": user.id,
-    #     "exp": (datetime.now() + timedelta(hours=1))
-    # }
-
-    # tokens = jwt.encode(payload=json_data, key=SECRET_KEY, algorithm="HS256")
+       # tokens = jwt.encode(payload=json_data, key=SECRET_KEY, algorithm="HS256")
 
     token = token_generation(user.company_email)
     # return JsonResponse({"message": "Workspace created"}, status=201)
@@ -280,37 +273,15 @@ def createworkspace(request):
     #     "message": "Workspace created"
     # })
 
-    # tok = token()
-    # tok.email = user.company_email
-    # tok.token = token
-    # tok.save()
-
 
     # user.save()
 
     # send_mail(
     #     subject="Bluetick Workspace otp",
-    #     message=otp,
+    #     message=token,
     #     from_email=settings.EMAIL_HOST_USER,
-    #     recipient_list=[user.company_email])
-    # token_generation(request,"Bluetick account otp",user.company_email)
-
-
-    # otp = request.POST.get('otp')
-    # if otp == otp:
-    #     user.save()
-    #     return JsonResponse({
-    #         "message": "Workspace created successfully",
-    #         "token": tokens
-    #     })
-    # else:
-    #     return JsonResponse({
-    #         "message": "Invalid otp"
-    #     }, status = 401)
-
-
-
-    # link = "http://localhost:8000/api/signup " 
+    #     recipient_list=[email])
+     
     user.save()
 
     return JsonResponse({
@@ -320,28 +291,26 @@ def createworkspace(request):
                         status=200)
 
 
-# create ans send the otp to the user
-# @csrf_exempt
-# def sendotp()
+
 
 #TODO generate invitation link
-@csrf_exempt   # This is to disable the CSRF protection
-def generateLink(request):
+# @csrf_exempt   # This is to disable the CSRF protection
+# def generateLink(request):
 
 
-    json_data = {
-                # "user": user.id,
-                "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
-            }
+#     json_data = {
+#                 # "user": user.id,
+#                 "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
+#             }
 
-    token = jwt.encode(json_data, SECRET_KEY)
+#     token = jwt.encode(json_data, SECRET_KEY)
 
-    link = "http://localhost:8000/api/signup " + token
+#     link = "http://localhost:8000/api/signup " + token
 
-    return JsonResponse({ 
-        "token": token,
-        "link": link,
-    })
+#     return JsonResponse({ 
+#         "token": token,
+#         "link": link,
+#     })
 
 
 # signup a new staff and verify invitation link
@@ -594,53 +563,9 @@ def resetpassword(request):
         return JsonResponse({"message": "User not found"},
                             status=404)
 
-def gmail_create_draft(content, emailto, emailfrom, emailsub):
-    """Create and insert a draft email.
-       Print the returned draft's message and id.
-       Returns: Draft object, including draft id and message meta data.
-
-      Load pre-authorized user credentials from the environment.
-      TODO(developer) - See https://developers.google.com/identity
-      for guides on implementing OAuth2 for the application.
-    """
-    creds, _ = google.auth.default()
-
-    try:
-        # create gmail api client
-        service = build('gmail', 'v1', credentials=creds)
-
-        message = EmailMessage()
-
-        message.set_content(content)
-
-        message['To'] = emailto
-        message['From'] = emailfrom
-        message['Subject'] = emailsub
-
-        # encoded message
-        encoded_message = base64.urlsafe_b64encode(message.as_bytes()).decode()
-
-        create_message = {
-                'raw': encoded_message
-        }
-        # pylint: disable=E1101
-        draft = service.users().drafts().create(userId="me",
-                                                body=create_message).execute()
-
-        print(F'Draft id: {draft["id"]}\nDraft message: {draft["message"]}')
-
-    except HttpError as error:
-        print(F'An error occurred: {error}')
-        draft = None
-
-    return draft
 
 
-# request for the otp
-# verify the otp
-# if it is correct create the workspace
-
-# a function for sending and verifying the OTP
+# a function for  verifying the OTP for creating a workspace
 @csrf_exempt
 def token_verify(request):
     if request.method != 'POST':
@@ -655,6 +580,7 @@ def token_verify(request):
     # add if the user is verified or not in the database
     email = body['email']
     if toke.verify_token(token):
+        verified = Domain.objects.filter(company_email=email).update(verified=True)
         return JsonResponse({
             "message": "Token verified"
         },status=200)
@@ -662,7 +588,8 @@ def token_verify(request):
         return JsonResponse({
             "message": "Invalid token"
         },status=400)
-        
+
+# verify otp for resetting password
 @csrf_exempt
 def reset_verify(request):
     if request.method != 'POST':
@@ -684,6 +611,8 @@ def reset_verify(request):
         },status=400)
 
     # return JsonResponse({"message": "Token verified"})
+
+# Reset password of either user or workspace
 @csrf_exempt
 def reset_password(request):
     if request.method != 'POST':
@@ -729,15 +658,7 @@ def reset_password(request):
             return JsonResponse({"message": "Password reset successfully"}, status=200)
         else:
             return JsonResponse({"message":"Password update unsuccessful"})
-        
-
-        # try:
-        #     us.save()
-        # except Exception as e:
-        #     print(e)
-        # print(user.password)
-        return JsonResponse({"message": "Password reset successfully"},
-                            status=200)
+    
     elif work:
         wp = Domain.objects.filter(company_email = email_ad).update(password=(bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
         # work.password = bcrypt.hashpw(password1.encode('utf-8'),
@@ -752,10 +673,6 @@ def reset_password(request):
         return JsonResponse({"message": "User not found"},
                             status=404)
     
-
-
-
-
 
 # if __name__ == '__main__':
 #     gmail_create_draft()

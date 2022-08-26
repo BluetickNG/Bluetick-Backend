@@ -13,6 +13,7 @@ class User(models.Model):
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=True)
 
+    pas_reset = models.BooleanField(default=False)
 
     domain = models.TextField()
     
@@ -59,7 +60,8 @@ class Domain(models.Model):
     company_email = models.EmailField(max_length=100, unique=True)
     company_phone = models.CharField(max_length=100)
     password = models.BinaryField()
-    # verified = models.BooleanField()
+    verified = models.BooleanField(default=False)
+    pas_reset = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now=True)
 
