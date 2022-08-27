@@ -426,72 +426,75 @@ def addmem(request):
 # signup as a new user ie not admin/ workspace
 @csrf_exempt
 def signup(request):
+    # return JsonResponse({"hello"})
     if request.method != 'POST':
         return JsonResponse({"message": "Invalid Method. Not Allowed"},
                             status=400)
 
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
+    try:
+        body_unicode = request.body.decode('utf-8')
+        body = json.loads(body_unicode)
 
 
-    email = body['email']
-    password1 = body['password1']
-    password2 = body['password2']
-    if password1 != password2:
-        return JsonResponse({"message": "Passwords do not match"}, status=400)
-    # username = request.POST.get('username')
+        email = body['email']
+        password1 = body['password1']
+        password2 = body['password2']
+        if password1 != password2:
+            return JsonResponse({"message": "Passwords do not match"}, status=400)
+        # username = request.POST.get('username')
 
-    full_name = body['full_name']
-    role = body['role']
-
-    if email == None or password1 == None or full_name == None or role == None:
-        return JsonResponse({"message": "Missing required fields"}, status=400)
-    # last_name = request.POST.get('last_name')
-    # middle_name = request.POST.get('middle_name')
-
-    # check if email already exists
-    if email in User.objects.values_list('email', flat=True):
-        return JsonResponse({"message": "Email already exists"}, status=400)
-
-    # check if full_name already exists
-    if full_name in User.objects.values_list('full_name', flat=True):
-        return JsonResponse({"message": "Full name already exists"}, status=400)
-
-    # domain = request.POST.get('domain')
-    domain = 'startup'
-
-    # try:
-    user = User()
-    if email in User.objects.values_list('email', flat=True):
-        return JsonResponse({"message": "Email already exists"}, status=400)
+        full_name = body['full_name']
+        role = body['role']
     
+        if email == None or password1 == None or full_name == None or role == None:
+            return JsonResponse({"message": "Missing required fields"}, status=400)
+        # last_name = request.POST.get('last_name')
+        # middle_name = request.POST.get('middle_name')
 
-    user.email = email
-    user.password = bcrypt.hashpw(password1.encode('utf-8'),
-                                    bcrypt.gensalt())
-    # user.username = username
-    user.full_name = full_name
-    user.role = role
-    # user.last_name = last_name
-    # user.middle_name = middle_name
+        # check if email already exists
+        if email in User.objects.values_list('email', flat=True):
+            return JsonResponse({"message": "Email already exists"}, status=400)
 
-    user.domain = domain
-    user.is_staff = True
+        # check if full_name already exists
+        if full_name in User.objects.values_list('full_name', flat=True):
+            return JsonResponse({"message": "Full name already exists"}, status=400)
 
-    json_data = {
-        "user": user.id,
-        "exp": (datetime.now() + timedelta(hours=1))
-    }
+        # domain = request.POST.get('domain')
+        domain = 'startup'
 
-    token = jwt.encode(payload=json_data, key=SECRET_KEY, algorithm="HS256")
-    user.save()
+        # try:
+        user = User()
+        if email in User.objects.values_list('email', flat=True):
+            return JsonResponse({"message": "Email already exists"}, status=400)
+        
 
-    return JsonResponse({
-        "message": "User created",
-        "token": token
-    },
-                        status=200)
-    # except:
+        user.email = email
+        user.password = bcrypt.hashpw(password1.encode('utf-8'),
+                                        bcrypt.gensalt())
+        # user.username = username
+        user.full_name = full_name
+        user.role = role
+        # user.last_name = last_name
+        # user.middle_name = middle_name
+
+        user.domain = domain
+        user.is_staff = True
+
+        json_data = {
+            "user": user.id,
+            "exp": (datetime.now() + timedelta(hours=1))
+        }
+
+        token = jwt.encode(payload=json_data, key=SECRET_KEY, algorithm="HS256")
+        user.save()
+
+        return JsonResponse({
+            "message": "User created",
+            "token": token
+        },
+                            status=200)
+    except Exception as e:
+        print(e)
     #     return JsonResponse({"message": "An error occurred"}, status=500)
 
 
