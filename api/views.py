@@ -447,14 +447,14 @@ def signup(request):
             email = body['email']
             password1 = body['password1']
             password2 = body['password2']
+            full_name = body['full_name']
+            role = body['role']
         except:
             return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
         if password1 != password2:
             return JsonResponse({"message": "Passwords do not match"}, status=400)
         # username = request.POST.get('username')
 
-        full_name = body['full_name']
-        role = body['role']
     
         if email == None or password1 == None or full_name == None or role == None:
             return JsonResponse({"message": "Missing required fields"}, status=400)
