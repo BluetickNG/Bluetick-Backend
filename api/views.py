@@ -121,7 +121,7 @@ def token_generation(email):
     # gmail_create_draft(content = 'token: ' + generate_token, emailto = user.company_email, emailfrom = 'fikayodan@gmail.com', emailsub = 'token')
     send_mail(
         'Bluetick',
-        'token: ' + generate_token,
+        'token to verify workspace: ' + generate_token,
         settings.EMAIL_HOST_USER,
         [email],
         fail_silently=False,
@@ -132,7 +132,7 @@ def token_generation(email):
     #     "message": "Token generated"                      
     # },status=200)
 #     token = request.POST.get('token')
-
+ 
 @csrf_exempt
 def getToken(request):
     auth = request.headers['Authorization']
@@ -169,12 +169,12 @@ def login(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
 
-    email = body['email']
-    password = body['password']
-
-    # return JsonResponse({
-    #     "omo": "user"
-    # })
+    try:
+        email = body['email']
+        password = body['password']
+    except:
+        return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
+    
     if email is None or password is None:
         return JsonResponse({
             "message": "Missing credentials"
@@ -224,10 +224,14 @@ def createworkspace(request):
     # return JsonResponse({"email": content})
 
     
-
-    email = body['email']
-    password1 = body['password1']
-    password2 = body['password2']
+    try:
+        email = body['email']
+        password1 = body['password1']
+        password2 = body['password2']
+        phone = body['phone']
+        workspace_name = body['workspace_name']
+    except:
+        return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
 
     workspace = Domain.objects.values_list('company_email', flat=True)
     if email in workspace:
@@ -237,10 +241,8 @@ def createworkspace(request):
 
     if password1 != password2:
         return JsonResponse({"message": "Passwords do not match"}, status=400)
-    workspace_name = body['workspace_name']
 
 
-    phone = body['phone']
 
 
     work_name = Domain.objects.values_list('company_name', flat=True)
@@ -321,9 +323,12 @@ def signemail(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
 
-    email = body["email"]
-    invitation_link = body["invitation_link"]
-
+    try:
+        email = body["email"]
+        invitation_link = body["invitation_link"]
+    except Exception as e:
+        print(e)
+        return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
 
     emails_sent= invitation.objects.values_list('email', flat=True)
     all_sent = list(chain(emails_sent))
@@ -358,8 +363,11 @@ def addmem(request):
         return JsonResponse({"message":"Invalid Method"}, status = 400)
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
-    email_list = body["email_list"]
-    workspacename = body["workspacename"]
+    try:
+        email_list = body["email_list"]
+        workspacename = body["workspacename"]
+    except:
+        return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
 
     print(email_list)
 
@@ -435,10 +443,12 @@ def signup(request):
         body_unicode = request.body.decode('utf-8')
         body = json.loads(body_unicode)
 
-
-        email = body['email']
-        password1 = body['password1']
-        password2 = body['password2']
+        try:
+            email = body['email']
+            password1 = body['password1']
+            password2 = body['password2']
+        except:
+            return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
         if password1 != password2:
             return JsonResponse({"message": "Passwords do not match"}, status=400)
         # username = request.POST.get('username')
@@ -578,10 +588,13 @@ def token_verify(request):
     body_unicode = request.body.decode('utf-8')
     body = json.loads(body_unicode)
 
-    token = body['token']
+    try:
+        token = body['token']
+        email = body['email']
+    except:
+        return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
     # print(token)
     # add if the user is verified or not in the database
-    email = body['email']
     if toke.verify_token(token):
         verified = Domain.objects.filter(company_email=email).update(verified=True)
         return JsonResponse({
@@ -698,5 +711,6 @@ def work_log(request):
 
         email = body['email']
         hours = body['work_hours']
+        workspacename = body['workspacename']
 
 
