@@ -161,6 +161,7 @@ def index(request):
 # login in for every user both admin and user
 @csrf_exempt
 def login(request):
+    return JsonResponse({"hello"})
     if request.method != 'POST':
         return JsonResponse({
             "message": "Method not allowed"
