@@ -161,7 +161,7 @@ def index(request):
 # login in for every user both admin and user
 @csrf_exempt
 def login(request):
-    # return JsonResponse({"hello"})
+    return JsonResponse({"hello"})
     if request.method != 'POST':
         return JsonResponse({
             "message": "Method not allowed"
@@ -181,19 +181,8 @@ def login(request):
             "message": "Missing credentials"
         }, status = 400)
 
-    # get all the users by email
-    # user_email_list = User.objects.values_list('email', flat=True)
-    # workspace_email_list = Domain.objects.values_list('company_email', flat=True)
-
-    # if email not in User.objects.values_list('email', flat=True) or email not in Domain.objects.values_list('company_email', flat=True):
-    #     return JsonResponse({
-    #         "message": "Invalid credentials"
-    #     }, status = 401)
     try:
         user = User.objects.get(email=email)
-        return JsonResponse({"done"})
-    except:
-        return JsonResponse({"error"})
         result = bcrypt.checkpw(password.encode('utf-8'), user.password)
 
         if result:
@@ -213,9 +202,9 @@ def login(request):
             "message": "Invalid email/password"
         }, status = 401)
         
-    # except :
-    #     print("User record not found")
-    #     return JsonResponse({"message": "User not found"}, status=404)
+    except:
+        print("User record not found")
+        return JsonResponse({"message": "User not found"}, status=404)
 # signing up a new workspace
 @csrf_exempt
 def createworkspace(request):
