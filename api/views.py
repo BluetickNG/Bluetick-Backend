@@ -210,7 +210,7 @@ def login(request):
             "message": "Invalid email/password"
         }, status = 401)
         
-    except ObjectDoesNotExist:
+    except :
         print("User record not found")
         return JsonResponse({"message": "User not found"}, status=404)
 # signing up a new workspace
