@@ -193,7 +193,7 @@ def login(request):
         user = User.objects.get(email=email)
         return JsonResponse({"done"})
     except:
-        return JsonResponse("error")
+        return JsonResponse({"error"})
         result = bcrypt.checkpw(password.encode('utf-8'), user.password)
 
         if result:
