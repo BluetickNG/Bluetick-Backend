@@ -191,6 +191,9 @@ def login(request):
     #     }, status = 401)
     try:
         user = User.objects.get(email=email)
+        return JsonResponse({"done"})
+    except:
+        return JsonResponse("error")
         result = bcrypt.checkpw(password.encode('utf-8'), user.password)
 
         if result:
@@ -210,9 +213,9 @@ def login(request):
             "message": "Invalid email/password"
         }, status = 401)
         
-    except :
-        print("User record not found")
-        return JsonResponse({"message": "User not found"}, status=404)
+    # except :
+    #     print("User record not found")
+    #     return JsonResponse({"message": "User not found"}, status=404)
 # signing up a new workspace
 @csrf_exempt
 def createworkspace(request):
