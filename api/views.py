@@ -683,8 +683,8 @@ def reset_password(request):
                             status=400) 
     
     # check if the person has verified a token by pas_reset
-    user = User.objects.get(email=email_ad)
-    if user.pas_reset == True:
+    user_main = User.objects.get(email=email_ad)
+    if user_main.pas_reset == True:
 
         # check if the email is in the user table
         work = Domain.objects.filter(company_email=email_ad).exists()
@@ -701,29 +701,38 @@ def reset_password(request):
         # print(type(user))
         # check if the user is in the workspace(domain) table
         if user:
-            us = User.objects.filter(email=email_ad).update(password = (bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
-            # us.password = bcrypt.hashpw(password1.encode('utf-8'),
-            #                                     bcrypt.gensalt())
-            if us == 1:
-                return JsonResponse({"message": "Password reset successfully"}, status=200)
+            user_main = User.objects.get(email=email_ad)
+            if user_main.pas_reset == True:
+                us = User.objects.filter(email=email_ad).update(password = (bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
+                # us.password = bcrypt.hashpw(password1.encode('utf-8'),
+                #                                     bcrypt.gensalt())
+                if us == 1:
+                    User.objects.filter(email=email_ad).update(pas_reset = False)
+                    return JsonResponse({"message": "Password reset successfully"}, status=200)
+                else:
+                    return JsonResponse({"message":"Password update unsuccessful"})
             else:
-                return JsonResponse({"message":"Password update unsuccessful"})
+                return JsonResponse({"message":"cannot reset password"}, status=400)
         
         elif work:
-            wp = Domain.objects.filter(company_email = email_ad).update(password=(bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
-            # work.password = bcrypt.hashpw(password1.encode('utf-8'),
-            #                                     bcrypt.gensalt())
-            # work.save()
-            if wp == 1:
-                return JsonResponse({"message": "Password reset successfully"},
-                                status=200)
+            domain_main = Domain.objects.get(email=email_ad)
+            if domain_main.pas_reset == True:
+                wp = Domain.objects.filter(company_email = email_ad).update(password=(bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
+                # work.password = bcrypt.hashpw(password1.encode('utf-8'),
+                #                                     bcrypt.gensalt())
+                # work.save()
+                if wp == 1:
+                    Domain.objects.filter(email=email_ad).update(pas_reset = False)
+                    return JsonResponse({"message": "Password reset successfully"},
+                                    status=200)
+                else:
+                    return JsonResponse({"message":"Password update unsuccessful"})
             else:
-                return JsonResponse({"message":"Password update unsuccessful"})
+                return JsonResponse({"message":"cannot reset password"}, status=400)
         else:
             return JsonResponse({"message": "User not found"},
                                 status=404)
-    else:
-        return JsonResponse({"message":"cannot reset password"})
+    
 
 # if __name__ == '__main__':
 #     gmail_create_draft()
