@@ -61,7 +61,7 @@ class TOTPVerification:
         # number of digits in a token. Default is 6
         self.number_of_digits = 6
         # validity period of a token. Default is 30 second.
-        self.token_validity_period = 350
+        self.token_validity_period = 300
 
     def totp_obj(self):
         # create a TOTP object
@@ -444,6 +444,14 @@ def signup(request):
             role = body['role']
         except:
             return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
+
+        try:
+            invi = invitation.objects.get(email=email)
+            workspacename = invi.workspacename
+        except Exception as e:
+            print(e)
+            # return JsonResponse({"message":"You have not been invited"}, status=400)
+
         if password1 != password2:
             return JsonResponse({"message": "Passwords do not match"}, status=400)
         # username = request.POST.get('username')
@@ -463,7 +471,9 @@ def signup(request):
             return JsonResponse({"message": "Full name already exists"}, status=400)
 
         # domain = request.POST.get('domain')
-        domain = 'startup'
+        
+
+        domain = workspacename
 
         # try:
         user = User()
@@ -568,8 +578,27 @@ def resetpassword(request):
     else:
         return JsonResponse({"message": "User not found"},
                             status=404)
+# generate token for resetting password
+@csrf_exempt
+def forgotpassword(request):
+    if request.method != 'POST':
+        return JsonResponse({"message": "Invalid method. Not allowed"})
+    body = json.loads(request.body.decode('utf-8'))
 
+    try:
+        email = body['email']
+    except:
+        return JsonResponse({"message":"Incomplete or incorrect credentials"})
+    
+    token = reset.generate_token()
 
+    send_mail(
+        subject="Reset password",
+        message=token,
+        from_email=settings.EMAIL_HOST_USER,
+        recipient_list=[email])
+
+    return JsonResponse({"message":"Token sent to mail","token":token})
 
 # a function for  verifying the OTP for creating a workspace
 @csrf_exempt
@@ -594,6 +623,7 @@ def token_verify(request):
             "message": "Token verified"
         },status=200)
     else:
+        # delete the data from the database 
         return JsonResponse({
             "message": "Invalid token"
         },status=400)
@@ -609,8 +639,14 @@ def reset_verify(request):
     body = json.loads(body_unicode)
 
     token = body['token']
+    email = body['email']
+
     if reset.verify_token(token):
-        
+        # set the pas_reset to true
+        if User.objects.filter(email=email).exists():
+            User.objects.filter(email=email).update(pas_reset=True)
+        elif Domain.objects.filter(email=email).exists():
+            Domain.objects.filter(email=email).update(pas_reset=True)
         return JsonResponse({
             "message": "Token verified"
         },status=200)
@@ -641,47 +677,53 @@ def reset_password(request):
     password1 = body['password']
     password2 = body['password2']
 
+
     if password1 != password2:
         return JsonResponse({"message": "Passwords do not match"},
                             status=400) 
     
-    # check if the email is in the user table
-    work = Domain.objects.filter(company_email=email_ad).exists()
-    # print(work)
+    # check if the person has verified a token by pas_reset
+    user = User.objects.get(email=email_ad)
+    if user.pas_reset == True:
+
+        # check if the email is in the user table
+        work = Domain.objects.filter(company_email=email_ad).exists()
+        # print(work)
 
 
-    user = User.objects.filter(email = email_ad).exists()
-    # print(user)
-    
-    
-    
+        user = User.objects.filter(email = email_ad).exists()
+        # print(user)
+        
+        
+        
 
-    # return JsonResponse({"message": "Password reset successfully"})
-    # print(type(user))
-    # check if the user is in the workspace(domain) table
-    if user:
-        us = User.objects.filter(email=email_ad).update(password = (bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
-        # us.password = bcrypt.hashpw(password1.encode('utf-8'),
-        #                                     bcrypt.gensalt())
-        if us == 1:
-            return JsonResponse({"message": "Password reset successfully"}, status=200)
+        # return JsonResponse({"message": "Password reset successfully"})
+        # print(type(user))
+        # check if the user is in the workspace(domain) table
+        if user:
+            us = User.objects.filter(email=email_ad).update(password = (bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
+            # us.password = bcrypt.hashpw(password1.encode('utf-8'),
+            #                                     bcrypt.gensalt())
+            if us == 1:
+                return JsonResponse({"message": "Password reset successfully"}, status=200)
+            else:
+                return JsonResponse({"message":"Password update unsuccessful"})
+        
+        elif work:
+            wp = Domain.objects.filter(company_email = email_ad).update(password=(bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
+            # work.password = bcrypt.hashpw(password1.encode('utf-8'),
+            #                                     bcrypt.gensalt())
+            # work.save()
+            if wp == 1:
+                return JsonResponse({"message": "Password reset successfully"},
+                                status=200)
+            else:
+                return JsonResponse({"message":"Password update unsuccessful"})
         else:
-            return JsonResponse({"message":"Password update unsuccessful"})
-    
-    elif work:
-        wp = Domain.objects.filter(company_email = email_ad).update(password=(bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
-        # work.password = bcrypt.hashpw(password1.encode('utf-8'),
-        #                                     bcrypt.gensalt())
-        # work.save()
-        if wp == 1:
-            return JsonResponse({"message": "Password reset successfully"},
-                            status=200)
-        else:
-            return JsonResponse({"message":"Password update unsuccessful"})
+            return JsonResponse({"message": "User not found"},
+                                status=404)
     else:
-        return JsonResponse({"message": "User not found"},
-                            status=404)
-    
+        return JsonResponse({"message":"cannot reset password"})
 
 # if __name__ == '__main__':
 #     gmail_create_draft()
