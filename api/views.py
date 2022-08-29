@@ -202,9 +202,10 @@ def login(request):
             "message": "Invalid email/password"
         }, status = 401)
         
-    except:
+    except Exception as e:
+        error = e
         print("User record not found")
-        return JsonResponse({"message": "User not found"}, status=404)
+        return JsonResponse({"message": "User not found","error":error}, status=404)
 # signing up a new workspace
 @csrf_exempt
 def createworkspace(request):
