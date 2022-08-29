@@ -176,10 +176,10 @@ def login(request):
     except:
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
     
-    if email is None or password is None:
-        return JsonResponse({
-            "message": "Missing credentials"
-        }, status = 400)
+    # if email is None or password is None:
+    #     return JsonResponse({
+    #         "message": "Missing credentials"
+    #     }, status = 400)
 
     try:
         user = User.objects.get(email=email)
@@ -203,9 +203,8 @@ def login(request):
         }, status = 401)
         
     except Exception as e:
-        error = e
         print("User record not found")
-        return JsonResponse({"message": "User not found","error":error}, status=404)
+        return JsonResponse({"message": "User not found","error":e}, status=404)
 # signing up a new workspace
 @csrf_exempt
 def createworkspace(request):
@@ -288,7 +287,7 @@ def createworkspace(request):
 
 
 
-
+ 
 #TODO generate invitation link
 # @csrf_exempt   # This is to disable the CSRF protection
 # def generateLink(request):
