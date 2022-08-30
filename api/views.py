@@ -61,7 +61,7 @@ class TOTPVerification:
         # number of digits in a token. Default is 6
         self.number_of_digits = 6
         # validity period of a token. Default is 30 second.
-        self.token_validity_period = 300
+        self.token_validity_period = 3000
 
     def totp_obj(self):
         # create a TOTP object
@@ -623,6 +623,7 @@ def token_verify(request):
             "message": "Token verified"
         },status=200)
     else:
+        # Domain.objects.filter(company_email=email).delete()
         # delete the data from the database 
         return JsonResponse({
             "message": "Invalid token"
