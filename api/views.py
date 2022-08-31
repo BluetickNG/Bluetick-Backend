@@ -183,28 +183,35 @@ def login(request):
 
     try:
         user = User.objects.get(email=email)
+    except:
+        return JsonResponse({"user"})
+    try:
         result = bcrypt.checkpw(password.encode('utf-8'), user.password)
+    except:
+        return JsonResponse({"result"})
 
+    try:
         if result:
-            json_data = {
-                "user": user.id,
-                "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
-            }
+            # json_data = {
+            #     "user": user.id,
+            #     "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
+            # }
 
-            token = jwt.encode(json_data, SECRET_KEY)
+            # token = jwt.encode(json_data, SECRET_KEY)
 
             return JsonResponse({
                 "message": "Login successful",
-                "token": token
+                # "token": token
             })
-
         return JsonResponse({
             "message": "Invalid email/password"
         }, status = 401)
-        
     except:
-        print("User record not found")
-        return JsonResponse({"message": "User not found"}, status=404)
+        return JsonResponse({"check"})
+        
+    # except:
+    #     print("User record not found")
+    #     return JsonResponse({"message": "User not found"}, status=404)
 # signing up a new workspace
 @csrf_exempt
 def createworkspace(request):
