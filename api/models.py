@@ -19,20 +19,7 @@ class User(models.Model):
     
     created_at = models.DateTimeField(auto_now=True)
     updated_at = models.DateTimeField(auto_now=True)
-    # invitation_link = models.CharField(max_length=100, null=True)
-    # last_name = models.CharField(max_length=25)
-    # middle_name = models.CharField(max_length=25)
-    # department = models.CharField(max_length=25)
-
-    # email = models.ForeignKey('invitation', on_delete=models.CASCADE)
-    # red = models.foreignKey('Red', on_delete=models.CASCADE)
-    # username = models.CharField(max_length=20, unique=True)
     
-
-    # the invitation link
-
-    # is_manager = models.BooleanField(default=False)
-    # is_super = models.BooleanField(default=False)
 
 
 
@@ -77,13 +64,4 @@ class invitation(models.Model):
 
 
 
-class token(models.Model):
-    otp = models.CharField(max_length=250, unique=True)
-    email = models.EmailField(max_length=50)
-    created_at = models.DateTimeField(auto_now=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        db_table = 'otp'
-        ordering = ['-created_at']
 

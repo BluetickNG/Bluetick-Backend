@@ -584,22 +584,25 @@ def forgotpassword(request):
     if request.method != 'POST':
         return JsonResponse({"message": "Invalid method. Not allowed"})
     body = json.loads(request.body.decode('utf-8'))
-
     try:
         email = body['email']
     except:
         return JsonResponse({"message":"Incomplete or incorrect credentials"})
+
+    # check if the email is in the database
+    if User.objects.filter(email=email).exists() or Domain.objects.filter(company_email=email).exists():
     
-    token = reset.generate_token()
+        token = reset.generate_token()
 
-    send_mail(
-        subject="Reset password",
-        message=token,
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=[email])
+        send_mail(
+            subject="Reset password",
+            message=token,
+            from_email=settings.EMAIL_HOST_USER,
+            recipient_list=[email])
 
-    return JsonResponse({"message":"Token sent to mail","token":token})
-
+        return JsonResponse({"message":"Token sent to mail","token":token})
+    else:
+        return JsonResponse({"message":"User does not exist"})
 # a function for  verifying the OTP for creating a workspace
 @csrf_exempt
 def token_verify(request):
@@ -757,5 +760,56 @@ def work_log(request):
         email = body['email']
         hours = body['work_hours']
         workspacename = body['workspacename']
+        # get the clock in time, the clock out time, then calculate the amount of hours worked
+
+
+# get all the information of a particular user
+@csrf_exempt
+def getdetails(request):
+    body = json.loads(request.body.decode('utf-8'))
+
+    email = body['email']
+
+    user = User.objects.get(email=email)
+
+    user_details = {
+        "id":user_details.id,
+        "email":user.email,
+        "role":user.role,
+        "workspace":user.domain,
+        "fullname":user.full_name,
+        # the image field should just be like a url
+        # "profileimg":user.profile_img
+
+    }
+    return JsonResponse({"details":user_details})
+
+# get all the staff in a particular workspace
+@csrf_exempt
+def getstaffs(request):
+    body = json.loads(request.body.decode('utf-8'))
+    workspacename = body['workspacename']
+
+    user = User.objects.filter(domain=workspacename)
+    
+    all_staff_details = []
+    number_of_staffs = 0
+    for each in user:
+        user_details = {
+        "id":each.id,
+        "email":each.email,
+        "role":each.role,
+        "workspace":each.domain,
+        "fullname":each.full_name,
+        # the image field should just be like a url
+        # "profileimg":user.profile_img
+        }
+        all_staff_details.append(user_details)
+        number_of_staffs+=1
+        print(each.email)
+    print(all_staff_details)
+    return JsonResponse({"staff number":number_of_staffs, "all staff details":all_staff_details})
+
+# generate a csv file from the information from the database and send it to the admin at the end of the day or it can just be generated
 
 

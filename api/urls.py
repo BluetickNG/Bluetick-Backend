@@ -14,6 +14,8 @@ urlpatterns = [
     path('user', views.getusers),
     path('addmem', views.addmem),
     path('signemail', views.signemail),
+    path('getdetails', views.getdetails),
+    path('getstaffs', views.getstaffs),
     
 
 ]
