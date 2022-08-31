@@ -766,6 +766,9 @@ def work_log(request):
 # get all the information of a particular user
 @csrf_exempt
 def getdetails(request):
+    if request.method != 'POST':
+        return JsonResponse({"message": "Invalid Method. Not Allowed"},
+                            status=400)
     body = json.loads(request.body.decode('utf-8'))
 
     email = body['email']
@@ -787,6 +790,9 @@ def getdetails(request):
 # get all the staff in a particular workspace
 @csrf_exempt
 def getstaffs(request):
+    if request.method != 'POST':
+        return JsonResponse({"message": "Invalid Method. Not Allowed"},
+                            status=400)
     body = json.loads(request.body.decode('utf-8'))
     workspacename = body['workspacename']
 
