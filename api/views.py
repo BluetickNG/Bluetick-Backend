@@ -771,22 +771,27 @@ def getdetails(request):
                             status=400)
     body = json.loads(request.body.decode('utf-8'))
 
-    email = body['email']
+    try:
+        email = body['email']
+    except:
+        return JsonResponse({"message":"invalid or incomplete credentials"})
 
-    user = User.objects.get(email=email)
+    try:
+        user = User.objects.get(email=email)
 
-    user_details = {
-        "id":user_details.id,
-        "email":user.email,
-        "role":user.role,
-        "workspace":user.domain,
-        "fullname":user.full_name,
-        # the image field should just be like a url
-        # "profileimg":user.profile_img
+        user_details = {
+            "id":user.id,
+            "email":user.email,
+            "role":user.role,
+            "workspace":user.domain,
+            "fullname":user.full_name,
+            # the image field should just be like a url
+            # "profileimg":user.profile_img
 
-    }
-    return JsonResponse({"details":user_details})
-
+        }
+        return JsonResponse({"details":user_details})
+    except:
+        return JsonResponse({"message":"User doesn't exist"})
 # get all the staff in a particular workspace
 @csrf_exempt
 def getstaffs(request):
@@ -794,28 +799,34 @@ def getstaffs(request):
         return JsonResponse({"message": "Invalid Method. Not Allowed"},
                             status=400)
     body = json.loads(request.body.decode('utf-8'))
-    workspacename = body['workspacename']
 
-    user = User.objects.filter(domain=workspacename)
-    
-    all_staff_details = []
-    number_of_staffs = 0
-    for each in user:
-        user_details = {
-        "id":each.id,
-        "email":each.email,
-        "role":each.role,
-        "workspace":each.domain,
-        "fullname":each.full_name,
-        # the image field should just be like a url
-        # "profileimg":user.profile_img
-        }
-        all_staff_details.append(user_details)
-        number_of_staffs+=1
-        print(each.email)
-    print(all_staff_details)
-    return JsonResponse({"staff number":number_of_staffs, "all staff details":all_staff_details})
+    try:
+        workspacename = body['workspacename']
+    except:
+        return JsonResponse({"message":"invalid or incomplete credentials"})
 
+    try:
+        user = User.objects.filter(domain=workspacename)
+        
+        all_staff_details = []
+        number_of_staffs = 0
+        for each in user:
+            user_details = {
+            "id":each.id,
+            "email":each.email,
+            "role":each.role,
+            "workspace":each.domain,
+            "fullname":each.full_name,
+            # the image field should just be like a url
+            # "profileimg":user.profile_img
+            }
+            all_staff_details.append(user_details)
+            number_of_staffs+=1
+            print(each.email)
+        print(all_staff_details)
+        return JsonResponse({"staff number":number_of_staffs, "all staff details":all_staff_details})
+    except:
+        return JsonResponse({"message":"workspace does not exist"})
 # generate a csv file from the information from the database and send it to the admin at the end of the day or it can just be generated
 
 
