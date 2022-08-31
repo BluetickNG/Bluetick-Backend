@@ -161,57 +161,57 @@ def index(request):
 # login in for every user both admin and user
 @csrf_exempt
 def login(request):
+    # return JsonResponse({"hello"})
     if request.method != 'POST':
         return JsonResponse({
             "message": "Method not allowed"
         }, status = 405)
 
-    return JsonResponse({"hello"})
-    # body_unicode = request.body.decode('utf-8')
-    # body = json.loads(body_unicode)
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
 
-    # try:
-    #     email = body['email']
-    #     password = body['password']
-    # except:
-    #     return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
+    try:
+        email = body['email']
+        password = body['password']
+    except:
+        return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
     
-    # # if email is None or password is None:
-    # #     return JsonResponse({
-    # #         "message": "Missing credentials"
-    # #     }, status = 400)
-
-    # try:
-    #     user = User.objects.get(email=email)
-    # except:
-    #     return JsonResponse({"user"})
-    # try:
-    #     result = bcrypt.checkpw(password.encode('utf-8'), user.password)
-    # except:
-    #     return JsonResponse({"result"})
-
-    # try:
-    #     if result:
-    #         # json_data = {
-    #         #     "user": user.id,
-    #         #     "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
-    #         # }
-
-    #         # token = jwt.encode(json_data, SECRET_KEY)
-
-    #         return JsonResponse({
-    #             "message": "Login successful",
-    #             # "token": token
-    #         })
+    # if email is None or password is None:
     #     return JsonResponse({
-    #         "message": "Invalid email/password"
-    #     }, status = 401)
-    # except:
-    #     return JsonResponse({"check"})
-        
-    # except:
-    #     print("User record not found")
-    #     return JsonResponse({"message": "User not found"}, status=404)
+    #         "message": "Missing credentials"
+    #     }, status = 400)
+    try:
+        try:
+            user = User.objects.get(email=email)
+        except:
+            return JsonResponse({"user"})
+        try:
+            result = bcrypt.checkpw(password.encode('utf-8'), user.password)
+        except:
+            return JsonResponse({"result"})
+
+        try:
+            if result:
+                # json_data = {
+                #     "user": user.id,
+                #     "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
+                # }
+
+                # token = jwt.encode(json_data, SECRET_KEY)
+
+                return JsonResponse({
+                    "message": "Login successful",
+                    # "token": token
+                })
+            return JsonResponse({
+                "message": "Invalid email/password"
+            }, status = 401)
+        except:
+            return JsonResponse({"check"})
+            
+    except:
+        print("User record not found")
+        return JsonResponse({"message": "User not found"}, status=404)
 # signing up a new workspace
 @csrf_exempt
 def createworkspace(request):
