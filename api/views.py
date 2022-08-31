@@ -209,9 +209,11 @@ def login(request):
         except:
             return JsonResponse({"check"})
             
-    except:
+    except Exception as e:
+        l = []
+        l.append(e)
         print("User record not found")
-        return JsonResponse({"message": "User not found"}, status=404)
+        return JsonResponse({"message": "User not found", "error":l}, status=404)
 # signing up a new workspace
 @csrf_exempt
 def createworkspace(request):
