@@ -16,6 +16,9 @@ urlpatterns = [
     path('signemail', views.signemail),
     path('getdetails', views.getdetails),
     path('getstaffs', views.getstaffs),
+    path('workspacedetails', views.workspacedetails),
+    path('getallworkspace', views.getallworkspace),
+    path('deleter', views.deleter),
     
 
 ]

@@ -4,6 +4,7 @@ import email
 from email import message
 from os import environ
 from telnetlib import STATUS
+from xml import dom
 from django.http import Http404, HttpResponseForbidden, HttpResponseNotFound
 from django.shortcuts import render
 from django.http.response import JsonResponse, HttpResponse,HttpResponseBadRequest
@@ -17,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 # from bluetick.settings import RECIPIENT_ADDRESS
 
-from .models import Domain, User, invitation
+from .models import Domain, User, invitation, Worklog
 import random
 
 from django.core.mail import send_mail
@@ -61,7 +62,7 @@ class TOTPVerification:
         # number of digits in a token. Default is 6
         self.number_of_digits = 6
         # validity period of a token. Default is 30 second.
-        self.token_validity_period = 3000
+        self.token_validity_period = 300
 
     def totp_obj(self):
         # create a TOTP object
@@ -227,8 +228,12 @@ def createworkspace(request):
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
 
     workspace = Domain.objects.values_list('company_email', flat=True)
+    user = User.objects.values_list('email', flat=True)
     if email in workspace:
         return JsonResponse({"message": "Email already exists"}, status=400)
+    elif email in user:
+        return JsonResponse({"message": "Email already exists"}, status=400)
+
 
     
 
@@ -754,13 +759,32 @@ def getusers(request):
 def work_log(request):
 
     if request.method != 'POST':
+        return JsonResponse({"message": "Invalid Method. Not Allowed"},
+                            status=400)
 
-        body = json.loads(request.body.decode('utf-8'))
+    body = json.loads(request.body.decode('utf-8'))
 
+    try:
         email = body['email']
-        hours = body['work_hours']
+        clockin = body['clockin_time']
+        clockout = body['clockout_time']
         workspacename = body['workspacename']
-        # get the clock in time, the clock out time, then calculate the amount of hours worked
+        date = body['date']
+    except:
+        return JsonResponse({"message":"Invalid or inclomplete credentials"})
+
+    log = Worklog()
+
+    log.email = email
+    log.clockintime = clockin
+    log.clockouttime = clockout
+    log.date = date
+    log.workspace = workspacename
+    # log.workhour = clockout - clockin
+
+
+    
+    # get the clock in time and date, the clock out time, then calculate the amount of hours worked
 
 
 # get all the information of a particular user
@@ -783,10 +807,12 @@ def getdetails(request):
             "id":user.id,
             "email":user.email,
             "role":user.role,
+            "is_admin":user.is_admin,
+            "is_staff":user.is_staff,
             "workspace":user.domain,
             "fullname":user.full_name,
             # the image field should just be like a url
-            # "profileimg":user.profile_img
+            "profileimg":user.profile_img.url
 
         }
         return JsonResponse({"details":user_details})
@@ -815,18 +841,91 @@ def getstaffs(request):
             "id":each.id,
             "email":each.email,
             "role":each.role,
+            "is_admin":each.is_admin,
+            "is_staff":each.is_staff,
             "workspace":each.domain,
             "fullname":each.full_name,
             # the image field should just be like a url
-            # "profileimg":user.profile_img
+            "profileimg":each.profile_img.url
             }
             all_staff_details.append(user_details)
             number_of_staffs+=1
-            print(each.email)
-        print(all_staff_details)
+            # print(each.email)
+        # print(all_staff_details)
         return JsonResponse({"staff number":number_of_staffs, "all staff details":all_staff_details})
-    except:
+    except Exception as e:
+        print(e)
         return JsonResponse({"message":"workspace does not exist"})
 # generate a csv file from the information from the database and send it to the admin at the end of the day or it can just be generated
 
+@csrf_exempt
+def workspacedetails(request):
+    if request.method != 'POST':
+        return JsonResponse({"message":"Invalid method, Method not allowed"})
 
+    body = json.loads(request.body.decode('utf-8'))
+
+    try:
+        email = body['email']
+    except:
+        return JsonResponse({"message":"invalid or incomplete credentials"})
+
+    try:
+        user = Domain.objects.get(company_email=email)
+
+        user_details = {
+            "id":user.id,
+            "company email":user.company_email,
+            "is_admin":user.is_admin,
+            "is_staff":user.is_staff,
+            "workspace phone":user.company_phone,
+            "company name":user.company_name,
+            "verified":user.verified,
+            # the image field should just be like a url
+            "profileimg":user.Workspace_profile_img.url
+
+        }
+        return JsonResponse({"details":user_details})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"message":"Workspace doesn't exist"})
+
+# @csrf_exempt
+def getallworkspace(request):
+
+    
+    try:
+        # user = Domain.objects.filter(company_name=workspacename)
+        user = Domain.objects.all()
+       
+        
+        all_staff_details = []
+        number_of_staffs = 0
+        for each in user:
+            print("1")
+            user_details = {
+            "id":each.id,
+            "company email":each.company_email,
+            "is_admin":each.is_admin,
+            "is_staff":each.is_staff,
+            "workspace phone":each.company_phone,
+            "company name":each.company_name,
+            # the image field should just be like a url
+            "profileimg":each.Workspace_profile_img.url
+            }
+            all_staff_details.append(user_details)
+            number_of_staffs+=1
+            # print(each.company_email)
+        print(all_staff_details)
+        return JsonResponse({"Total number of workspaces":number_of_staffs, "all workspace details":all_staff_details})
+    except Exception as e:
+        print(e)
+        return JsonResponse({"message":"workspace does not exist"})
+
+def deleter(request):
+    User.objects.all().delete()
+    Domain.objects.all().delete()
+    invitation.objects.all().delete()
+    
+    
+    return JsonResponse({"message":"deleted"})

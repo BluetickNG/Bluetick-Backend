@@ -5,10 +5,11 @@ from django.db import models
 
 class User(models.Model):
     full_name = models.CharField(max_length=250, null=True)
-    role = models.CharField(max_length=50)
+    role = models.CharField(max_length=50, default="Null")
     email = models.CharField(max_length=225, unique=True)
     password = models.BinaryField()
     profile_img = models.ImageField(upload_to='profile_img', default = 'blank-profile-picture.png')
+    # profile_img = models.ImageField(upload_to='profile_img', default = 'https://res.cloudinary.com/dg4zlcau8/image/upload/v1661916483/blank-profile-picture_v6ojkd.png')
 
     is_admin = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=True)
@@ -17,7 +18,7 @@ class User(models.Model):
 
     domain = models.TextField()
     
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now=True) #format='%Y-%m-%d %H:%M:%S')
     updated_at = models.DateTimeField(auto_now=True)
     
 
@@ -53,15 +54,23 @@ class Domain(models.Model):
     created_at = models.DateTimeField(auto_now=True)
 
     is_admin = models.BooleanField(default=True)
+    is_staff = models.BooleanField(default=True)
+    Workspace_profile_img =  models.ImageField(upload_to='workspcae_img', default = 'blank-profile-picture.png')
+    # is_staff = models.BooleanField(default=True)
 
 
 # model for invitatoin link part
 class invitation(models.Model):
-    email = models.EmailField(max_length=50)
+    email = models.EmailField(max_length=100)
     invitation_link = models.CharField(max_length=250, unique=True)
     workspacename = models.CharField(max_length=250 )
 
-
-
+class Worklog(models.Model):
+    email = models.EmailField(max_length=100)
+    date = models.DateField()
+    clockintime = models.TimeField(default="00:00:00.00")
+    clockouttime = models.TimeField(default="00:00:00.00")
+    workhour = models.TimeField(default="00:00:00.00")
+    workspace = models.CharField(max_length=100)    
 
 
