@@ -181,22 +181,22 @@ def login(request):
     #     return JsonResponse({
     #         "message": "Missing credentials"
     #     }, status = 400)
-    return JsonResponse({"message":"done"})
+    # return JsonResponse({"message":"done"})
     try:
         user = User.objects.get(email=email)
         result = bcrypt.checkpw(password.encode('utf-8'), user.password)
 
         if result:
-            json_data = {
-                "user": user.id,
-                "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
-            }
+            # json_data = {
+            #     "user": user.id,
+            #     "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
+            # }
 
-            token = jwt.encode(json_data, SECRET_KEY)
+            # token = jwt.encode(json_data, SECRET_KEY)
 
             return JsonResponse({
                 "message": "Login successful",
-                "token": token
+                # "token": token
             })
 
         return JsonResponse({
@@ -227,7 +227,6 @@ def createworkspace(request):
     except:
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
 
-    return JsonResponse({"message":"done"})
     workspace = Domain.objects.values_list('company_email', flat=True)
     user = User.objects.values_list('email', flat=True)
     if email in workspace:
@@ -241,6 +240,7 @@ def createworkspace(request):
     if password1 != password2:
         return JsonResponse({"message": "Passwords do not match"}, status=400)
 
+    return JsonResponse({"message":"done"})
 
 
 
