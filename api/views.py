@@ -181,7 +181,7 @@ def login(request):
     #     return JsonResponse({
     #         "message": "Missing credentials"
     #     }, status = 400)
-
+    return JsonResponse({"message":"done"})
     try:
         user = User.objects.get(email=email)
         result = bcrypt.checkpw(password.encode('utf-8'), user.password)
@@ -227,6 +227,7 @@ def createworkspace(request):
     except:
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
 
+    return JsonResponse({"message":"done"})
     workspace = Domain.objects.values_list('company_email', flat=True)
     user = User.objects.values_list('email', flat=True)
     if email in workspace:
@@ -426,7 +427,7 @@ def addmem(request):
 
     # # for each member on the email list generate a special token and add something then save it in the database
     # # Then send it to the email
-    return JsonResponse({"message":"member added"})  
+    return JsonResponse({"message":"member added", "link":link})  
 
 
 # signup as a new user ie not admin/ workspace
