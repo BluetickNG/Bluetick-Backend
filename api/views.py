@@ -240,7 +240,6 @@ def createworkspace(request):
     if password1 != password2:
         return JsonResponse({"message": "Passwords do not match"}, status=400)
 
-    return JsonResponse({"message":"done"})
 
 
 
@@ -253,6 +252,7 @@ def createworkspace(request):
     #     return JsonResponse({"message": "Missing required fields"}, status=400)
     
     user = Domain()
+    # return JsonResponse({"message":"done"})
 
     # check if email already exists
     if email in Domain.objects.values_list('company_email', flat=True):
@@ -283,7 +283,7 @@ def createworkspace(request):
     #     from_email=settings.EMAIL_HOST_USER,
     #     recipient_list=[email])
      
-    user.save()
+    # user.save()
 
     return JsonResponse({
         "message": "Workspace created",
