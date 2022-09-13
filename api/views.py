@@ -182,10 +182,10 @@ def login(request):
     #         "message": "Missing credentials"
     #     }, status = 400)
     # return JsonResponse({"message":"done"})
-    try:
-        user = User.objects.get(email=email)
-        result = bcrypt.checkpw(password.encode('utf-8'), user.password)
+    user = User.objects.get(email=email)
+    result = bcrypt.checkpw(password.encode('utf-8'), user.password)
 
+    try:
         if result:
             # json_data = {
             #     "user": user.id,
@@ -266,49 +266,17 @@ def createworkspace(request):
     user.company_name = workspace_name
     user.company_phone = phone
 
-       # tokens = jwt.encode(payload=json_data, key=SECRET_KEY, algorithm="HS256")
-
     token = token_generation(user.company_email)
-    # return JsonResponse({"message": "Workspace created"}, status=201)
-    # return JsonResponse({
-    #     "message": "Workspace created"
-    # })
-
-
-    # user.save()
-
-    # send_mail(
-    #     subject="Bluetick Workspace otp",
-    #     message=token,
-    #     from_email=settings.EMAIL_HOST_USER,
-    #     recipient_list=[email])
-     
-    user.save()
-
+    
+    try:
+        user.save()
+    except:
+        return JsonResponse({"message":"save issue"})
     return JsonResponse({
         "message": "Workspace created",
         "token": token,
     },
                         status=200)
-
-#TODO generate invitation link
-# @csrf_exempt   # This is to disable the CSRF protection
-
-
-#     json_data = {
-#                 # "user": user.id,
-#                 "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
-#             }
-
-#     token = jwt.encode(json_data, SECRET_KEY)
-
-#     link = "http://localhost:8000/api/signup " + token
-
-#     return JsonResponse({ 
-#         "token": token,
-#         "link": link,
-#     })
-
 
 # signup a new staff and verify invitation link
 @csrf_exempt
