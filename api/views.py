@@ -283,7 +283,7 @@ def createworkspace(request):
     #     from_email=settings.EMAIL_HOST_USER,
     #     recipient_list=[email])
      
-    # user.save()
+    user.save()
 
     return JsonResponse({
         "message": "Workspace created",
