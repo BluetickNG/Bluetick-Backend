@@ -30,9 +30,9 @@ from django.conf import settings
 import base64
 from email.message import EmailMessage
 
-import google.auth
-from googleapiclient.discovery import build
-from googleapiclient.errors import HttpError
+# import google.auth
+# from googleapiclient.discovery import build
+# from googleapiclient.errors import HttpError
 
 # imports for otp
 from lib2to3.pgen2.tokenize import generate_tokens
@@ -926,6 +926,6 @@ def deleter(request):
     User.objects.all().delete()
     Domain.objects.all().delete()
     invitation.objects.all().delete()
-    
+
     
     return JsonResponse({"message":"deleted"})
