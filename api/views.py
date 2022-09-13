@@ -182,10 +182,11 @@ def login(request):
     #         "message": "Missing credentials"
     #     }, status = 400)
     # return JsonResponse({"message":"done"})
-    user = User.objects.get(email=email)
-    result = bcrypt.checkpw(password.encode('utf-8'), user.password)
-
     try:
+        user = User.objects.get(email=email)
+        result = bcrypt.checkpw(password.encode('utf-8'), user.password)
+        # result = True
+
         if result:
             # json_data = {
             #     "user": user.id,
@@ -306,7 +307,7 @@ def signemail(request):
         print(e)
     # print(user)
     print(user.email)
-
+    workspacename = user.workspacename
     # return JsonResponse({"message":"hello"})
     try:
         if user.invitation_link != invitation_link:
@@ -314,7 +315,7 @@ def signemail(request):
         else:
             user.delete()
             # delete the user and the link
-        return JsonResponse({"message":"link correct"})
+        return JsonResponse({"message":"link correct", "workspace name":workspacename})
     except Exception as e:
         print(e)
 
@@ -336,7 +337,7 @@ def addmem(request):
 
     
     # return JsonResponse({"message":"rest"})
-
+    link_list = []
     for email in email_list:
         print("hello")
         
@@ -347,6 +348,7 @@ def addmem(request):
         body = 'Copy the invitation link below\n'
         link ='https://'+email+'/?='+token
         
+        link_list.append(link)
         # try:
         user = invitation.objects.filter(email=email).exists()
         print(user)
@@ -391,7 +393,7 @@ def addmem(request):
 
     # # for each member on the email list generate a special token and add something then save it in the database
     # # Then send it to the email
-    return JsonResponse({"message":"member added", "link":link})  
+    return JsonResponse({"message":"member added", "link":link_list, "workspacename": workspacename})  
 
 
 # signup as a new user ie not admin/ workspace
