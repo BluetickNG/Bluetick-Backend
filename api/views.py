@@ -202,7 +202,7 @@ def login(request):
         return JsonResponse({
             "message": "Invalid email/password"
         }, status = 401)
-        
+                                     
     except:
         print("User record not found")
         return JsonResponse({"message": "User not found"}, status=404)
@@ -291,12 +291,8 @@ def createworkspace(request):
     },
                         status=200)
 
-
-
-
 #TODO generate invitation link
 # @csrf_exempt   # This is to disable the CSRF protection
-# def generateLink(request):
 
 
 #     json_data = {
