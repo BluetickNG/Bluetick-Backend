@@ -169,8 +169,9 @@ def login(request):
         }, status = 405)
 
     body_unicode = request.body.decode('utf-8')
+    # print(body_unicode[1])
     body = json.loads(body_unicode)
-
+    # b = request.get_json()
     try:
         email = body['email']
         password = body['password']
@@ -183,9 +184,11 @@ def login(request):
     #     }, status = 400)
     # return JsonResponse({"message":"done"})
     # try:
+    # print(password)
     user = User.objects.get(email=email)
-    byte_pass = password.encode('utf-8')
-    print(type(byte_pass))
+    # byte_pass = password.encode('utf-8')
+    byte_pass = bytes(password.encode('utf-8'))
+    print(byte_pass)
     print(type(user.password))
     result = bcrypt.checkpw(byte_pass, user.password)
     # result = True
