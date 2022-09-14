@@ -893,7 +893,7 @@ def getallworkspace(request):
         return JsonResponse({"Total number of workspaces":number_of_staffs, "all workspace details":all_staff_details})
     except Exception as e:
         print(e)
-        return JsonResponse({"message":"workspace does not exist"})
+        return JsonResponse({"message":e + " workspace does not exist"})
 
 def deleter(request):
     User.objects.all().delete()
