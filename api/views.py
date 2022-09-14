@@ -182,31 +182,31 @@ def login(request):
     #         "message": "Missing credentials"
     #     }, status = 400)
     # return JsonResponse({"message":"done"})
-    try:
-        user = User.objects.get(email=email)
-        result = bcrypt.checkpw(password.encode('utf-8'), user.password)
-        # result = True
+    # try:
+    user = User.objects.get(email=email)
+    result = bcrypt.checkpw(password.encode('utf-8'), user.password)
+    # result = True
 
-        if result:
-            # json_data = {
-            #     "user": user.id,
-            #     "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
-            # }
+    if result:
+        # json_data = {
+        #     "user": user.id,
+        #     "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
+        # }
 
-            # token = jwt.encode(json_data, SECRET_KEY)
-
-            return JsonResponse({
-                "message": "Login successful",
-                # "token": token
-            })
+        # token = jwt.encode(json_data, SECRET_KEY)
 
         return JsonResponse({
-            "message": "Invalid email/password"
-        }, status = 401)
-                                     
-    except:
-        print("User record not found")
-        return JsonResponse({"message": "User not found"}, status=404)
+            "message": "Login successful",
+            # "token": token
+        })
+
+    return JsonResponse({
+        "message": "Invalid email/password"
+    }, status = 401)
+                                    
+    # except:
+    #     print("User record not found")
+    #     return JsonResponse({"message": "User not found"}, status=404)
 # signing up a new workspace
 @csrf_exempt
 def createworkspace(request):
@@ -271,10 +271,10 @@ def createworkspace(request):
 
     token = token_generation(user.company_email)
     
-    try:
-        user.save()
-    except:
-        return JsonResponse({"message":"save issue"})
+    # try:
+    user.save()
+    # except:
+    #     return JsonResponse({"message":"save issue"})
     return JsonResponse({
         "message": "Workspace created",
         "token": token,
@@ -893,7 +893,7 @@ def getallworkspace(request):
         return JsonResponse({"Total number of workspaces":number_of_staffs, "all workspace details":all_staff_details})
     except Exception as e:
         print(e)
-        return JsonResponse({"message":e + " workspace does not exist"})
+        return JsonResponse({"message":" workspace does not exist"})
 
 def deleter(request):
     User.objects.all().delete()
