@@ -229,6 +229,8 @@ def createworkspace(request):
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
 
     workspace = Domain.objects.values_list('company_email', flat=True)
+    # user = User.objects.values_list('email', flat=True)
+
     user = User.objects.values_list('email', flat=True)
     if email in workspace:
         return JsonResponse({"message": "Email already exists"}, status=400)
@@ -335,12 +337,16 @@ def addmem(request):
 
     print(email_list)
 
-    
+    workspace = Domain.objects.values_list('company_email', flat=True)
+    # if the  email is already a workspace email return error
     # return JsonResponse({"message":"rest"})
     link_list = []
     for email in email_list:
         print("hello")
-        
+        if email in workspace:
+            return JsonResponse({"message": email + " already in system"})
+            
+
         new_toke = TOTPVerification()
         token = new_toke.generate_token()
         print(token)
@@ -393,7 +399,7 @@ def addmem(request):
 
     # # for each member on the email list generate a special token and add something then save it in the database
     # # Then send it to the email
-    return JsonResponse({"message":"member added", "link":link_list, "workspacename": workspacename})  
+    return JsonResponse({"message":"member added", "link":link_list})  
 
 
 # signup as a new user ie not admin/ workspace
