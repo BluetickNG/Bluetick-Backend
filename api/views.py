@@ -184,7 +184,10 @@ def login(request):
     # return JsonResponse({"message":"done"})
     # try:
     user = User.objects.get(email=email)
-    result = bcrypt.checkpw(password.encode('utf-8'), user.password)
+    byte_pass = password.encode('utf-8')
+    print(type(byte_pass))
+    print(type(user.password))
+    result = bcrypt.checkpw(byte_pass, user.password)
     # result = True
 
     if result:
@@ -231,10 +234,10 @@ def createworkspace(request):
     workspace = Domain.objects.values_list('company_email', flat=True)
     # user = User.objects.values_list('email', flat=True)
 
-    user = User.objects.values_list('email', flat=True)
+    users = User.objects.values_list('email', flat=True)
     if email in workspace:
         return JsonResponse({"message": "Email already exists"}, status=400)
-    elif email in user:
+    elif email in users:
         return JsonResponse({"message": "Email already exists"}, status=400)
 
 
