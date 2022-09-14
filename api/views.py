@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 # from bluetick.settings import RECIPIENT_ADDRESS
 
-from .models import  User, invitation, Worklog #Domain
+from .models import  User, invitation, Worklog, Domain
 import random
 
 from django.core.mail import send_mail
@@ -190,6 +190,8 @@ def login(request):
     byte_pass = bytes(password.encode('utf-8'))
     print(byte_pass)
     print(type(user.password))
+
+    
     result = bcrypt.checkpw(byte_pass, user.password)
     # result = True
 
