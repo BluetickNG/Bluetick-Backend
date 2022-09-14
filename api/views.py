@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 # from bluetick.settings import RECIPIENT_ADDRESS
 
-from .models import Domain, User, invitation, Worklog
+from .models import  User, invitation, Worklog #Domain
 import random
 
 from django.core.mail import send_mail

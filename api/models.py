@@ -43,20 +43,20 @@ class Log(models.Model):
     data = models.TextField()
     
 
-class Domain(models.Model):
-    company_name = models.CharField(max_length=100, unique=True)
-    company_email = models.EmailField(max_length=100, unique=True)
-    company_phone = models.CharField(max_length=100)
-    password = models.BinaryField()
-    verified = models.BooleanField(default=False)
-    pas_reset = models.BooleanField(default=False)
+# class Domain(models.Model):
+#     company_name = models.CharField(max_length=100, unique=True)
+#     company_email = models.EmailField(max_length=100, unique=True)
+#     company_phone = models.CharField(max_length=100)
+#     password = models.BinaryField()
+#     verified = models.BooleanField(default=False)
+#     pas_reset = models.BooleanField(default=False)
 
-    created_at = models.DateTimeField(auto_now=True)
+#     created_at = models.DateTimeField(auto_now=True)
 
-    is_admin = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=True)
-    Workspace_profile_img =  models.ImageField(upload_to='workspcae_img', default = 'blank-profile-picture.png')
-    # is_staff = models.BooleanField(default=True)
+#     is_admin = models.BooleanField(default=True)
+#     is_staff = models.BooleanField(default=True)
+#     Workspace_profile_img =  models.ImageField(upload_to='workspcae_img', default = 'blank-profile-picture.png')
+#     # is_staff = models.BooleanField(default=True)
 
 
 # model for invitatoin link part
