@@ -1,33 +1,51 @@
 from email.policy import default
 from django.db import models
-
+from django.contrib.auth.models import AbstractUser
 # Create your models here.
 
-class User(models.Model):
+# class User(models.Model):
+#     full_name = models.CharField(max_length=250, null=True)
+#     role = models.CharField(max_length=50, default="Null")
+#     email = models.CharField(max_length=225, unique=True)
+#     password = models.BinaryField()
+#     profile_img = models.ImageField(upload_to='profile_img', default = 'blank-profile-picture.png')
+#     # profile_img = models.ImageField(upload_to='profile_img', default = 'https://res.cloudinary.com/dg4zlcau8/image/upload/v1661916483/blank-profile-picture_v6ojkd.png')
+
+#     is_admin = models.BooleanField(default=False)
+#     is_staff = models.BooleanField(default=True)
+
+#     pas_reset = models.BooleanField(default=False)
+
+#     domain = models.TextField()
+    
+#     created_at = models.DateTimeField(auto_now=True) #format='%Y-%m-%d %H:%M:%S')
+#     updated_at = models.DateTimeField(auto_now=True)
+    
+
+
+
+    # class Meta:
+    #     db_table = 'api_user'
+    #     # ordering = ['-created_at']
+
+class User(AbstractUser):
+    # username = None
+    last_login = None
+    first_name = None
+    last_name = None
     full_name = models.CharField(max_length=250, null=True)
     role = models.CharField(max_length=50, default="Null")
-    email = models.CharField(max_length=225, unique=True)
-    password = models.BinaryField()
     profile_img = models.ImageField(upload_to='profile_img', default = 'blank-profile-picture.png')
-    # profile_img = models.ImageField(upload_to='profile_img', default = 'https://res.cloudinary.com/dg4zlcau8/image/upload/v1661916483/blank-profile-picture_v6ojkd.png')
-
-    is_admin = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=True)
-
+    domain = models.CharField(max_length=300)
     pas_reset = models.BooleanField(default=False)
-
-    domain = models.TextField()
-    
-    created_at = models.DateTimeField(auto_now=True) #format='%Y-%m-%d %H:%M:%S')
-    updated_at = models.DateTimeField(auto_now=True)
-    
-
 
 
     class Meta:
-        db_table = 'api_user'
-        # ordering = ['-created_at']
+        verbose_name = 'user'
+        verbose_name_plural = '1. Users'
 
+    def _str_(self):
+        return self.full_name
 
 class Log(models.Model):
     created_at = models.DateTimeField(auto_now=True)
@@ -39,7 +57,7 @@ class Log(models.Model):
     #   "long": xxx,
     # }
     location = models.TextField()
-    user = User
+    # user = User
     data = models.TextField()
     
 
@@ -57,6 +75,7 @@ class Domain(models.Model):
     is_staff = models.BooleanField(default=True)
     Workspace_profile_img =  models.ImageField(upload_to='workspcae_img', default = 'blank-profile-picture.png')
     # is_staff = models.BooleanField(default=True)
+
 
 
 # model for invitatoin link part

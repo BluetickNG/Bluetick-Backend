@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 # from bluetick.settings import RECIPIENT_ADDRESS
 
-from .models import  User, invitation, Worklog, Domain
+from .models import  invitation, Worklog, Domain, User 
 import random
 
 from django.core.mail import send_mail
@@ -177,22 +177,24 @@ def login(request):
         password = body['password']
     except:
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
-    
+
     # if email is None or password is None:
     #     return JsonResponse({
     #         "message": "Missing credentials"
     #     }, status = 400)
     # return JsonResponse({"message":"done"})
     # try:
-    # print(password)
     user = User.objects.get(email=email)
     # byte_pass = password.encode('utf-8')
-    byte_pass = bytes(password.encode('utf-8'))
-    print(byte_pass)
-    print(type(user.password))
+    # byte_pass = bytes(password.encode('utf-8'))
+    # print(type(byte_pass))
+    print(type(password))
+    print(password)
+    print(user.password)
 
-    
-    result = bcrypt.checkpw(byte_pass, user.password)
+    result = User.check_password(user, password)
+    # print(result)
+    # result = bcrypt.checkpw(byte_pass, user.password)
     # result = True
 
     if result:
@@ -485,7 +487,12 @@ def signup(request):
         }
 
         token = jwt.encode(payload=json_data, key=SECRET_KEY, algorithm="HS256")
-        user.save()
+        try:
+            user.save()
+        except Exception as e:
+            print(e)
+            return JsonResponse({"wahala"})
+
 
         return JsonResponse({
             "message": "User created",
