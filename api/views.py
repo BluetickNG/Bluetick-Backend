@@ -808,7 +808,7 @@ def getdetails(request):
             "id":user.id,
             "email":user.email,
             "role":user.role,
-            "is_admin":user.is_admin,
+            # "is_admin":user.is_admin,
             "is_staff":user.is_staff,
             "workspace":user.domain,
             "fullname":user.full_name,
@@ -834,7 +834,7 @@ def getstaffs(request):
 
     try:
         user = User.objects.filter(domain=workspacename)
-        
+        print(user)
         all_staff_details = []
         number_of_staffs = 0
         for each in user:
@@ -842,7 +842,7 @@ def getstaffs(request):
             "id":each.id,
             "email":each.email,
             "role":each.role,
-            "is_admin":each.is_admin,
+            # "is_admin":each.is_admin,
             "is_staff":each.is_staff,
             "workspace":each.domain,
             "fullname":each.full_name,
