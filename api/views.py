@@ -174,7 +174,7 @@ def login(request):
     # b = request.get_json()
     try:
         email = body['email']
-        password = body['password']
+        raw_password = body['password']
     except:
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
 
@@ -185,15 +185,16 @@ def login(request):
     # return JsonResponse({"message":"done"})
     # try:
     user = User.objects.get(email=email)
+    workspace = user.domain
     # byte_pass = password.encode('utf-8')
     # byte_pass = bytes(password.encode('utf-8'))
     # print(type(byte_pass))
-    print(type(password))
-    print(password)
+    # print(type(password))
+    print(raw_password)
     print(user.password)
 
-    result = User.check_password(user, password)
-    # print(result)
+    result = user.check_password(raw_password)
+    print(result)
     # result = bcrypt.checkpw(byte_pass, user.password)
     # result = True
 
@@ -207,6 +208,7 @@ def login(request):
 
         return JsonResponse({
             "message": "Login successful",
+            "workspacename":workspace
             # "token": token
         })
 
@@ -265,6 +267,7 @@ def createworkspace(request):
     #     return JsonResponse({"message": "Missing required fields"}, status=400)
     
     user = Domain()
+    setuser = User()
     # return JsonResponse({"message":"done"})
 
     # check if email already exists
@@ -280,9 +283,17 @@ def createworkspace(request):
     user.company_phone = phone
 
     token = token_generation(user.company_email)
+
+    setuser.full_name = workspace_name
+    setuser.email = email
+    setuser.role = "admin"
+    setuser.domain = workspace_name
+    setuser.set_password(password1)
+    # setuser.is_superuser
     
     # try:
     user.save()
+    setuser.save()
     # except:
     #     return JsonResponse({"message":"save issue"})
     return JsonResponse({
@@ -308,11 +319,11 @@ def signemail(request):
 
     emails_sent= invitation.objects.values_list('email', flat=True)
     all_sent = list(chain(emails_sent))
-
+    print(all_sent)
     # print(all_sent)
 
-    if email not in all_sent:
-        return JsonResponse({"message":"You have not been invited"})
+    # if email not in all_sent:
+    #     return JsonResponse({"message":"You have not been invited"})
     try:
         user = invitation.objects.get(email=email)
     except Exception as e:
@@ -324,8 +335,8 @@ def signemail(request):
     try:
         if user.invitation_link != invitation_link:
             return JsonResponse({"message":"invalid invitation link"}, status=403)
-        else:
-            user.delete()
+        # else:
+            # user.delete()
             # delete the user and the link
         return JsonResponse({"message":"link correct", "workspace name":workspacename})
     except Exception as e:
@@ -438,7 +449,7 @@ def signup(request):
             workspacename = invi.workspacename
         except Exception as e:
             print(e)
-            # return JsonResponse({"message":"You have not been invited"}, status=400)
+            return JsonResponse({"message":"You have not been invited"}, status=400)
 
         if password1 != password2:
             return JsonResponse({"message": "Passwords do not match"}, status=400)
@@ -470,9 +481,10 @@ def signup(request):
         
 
         user.email = email
-        user.password = bcrypt.hashpw(password1.encode('utf-8'),
-                                        bcrypt.gensalt())
+        # user.password = bcrypt.hashpw(password1.encode('utf-8'),
+        #                                 bcrypt.gensalt())
         # user.username = username
+        user.set_password(password1)
         user.full_name = full_name
         user.role = role
         # user.last_name = last_name
@@ -481,6 +493,7 @@ def signup(request):
         user.domain = domain
         user.is_staff = True
 
+        # return JsonResponse({"message":"Hello"})
         json_data = {
             "user": user.id,
             "exp": (datetime.now() + timedelta(hours=1))
@@ -501,7 +514,7 @@ def signup(request):
                             status=200)
     except Exception as e:
         print(e)
-    #     return JsonResponse({"message": "An error occurred"}, status=500)
+        return JsonResponse({"message": "An error occurred"}, status=500)
 
 
 # this is for the forgot password part of the app
