@@ -14,7 +14,7 @@
 ### [bluetick](/bluetick)
 - Django project, implements the api app
 1. [__init__.py](/bluetick/__init__.py) : makes the api directory a module
-2. [asgi.py](/bluetick/asgi.p): would be used for the app chat function
+2. [asgi.py](/bluetick/asgi.py): would be used for the app chat function
 > asgi.py functions is not yet implemented
 3. [settings.py](/bluetick/settings.py) : All applications, security modules and databases are registered here
 4. [urls.py](/bluetick/urls.py) : used to connect the api app urls to the django project
