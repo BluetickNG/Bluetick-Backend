@@ -10,9 +10,11 @@ from django.shortcuts import render
 from django.http.response import JsonResponse, HttpResponse,HttpResponseBadRequest
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import auth
 
 import bcrypt
 import jwt
+
 
 from django.views.decorators.csrf import csrf_exempt
 
@@ -199,21 +201,27 @@ def login(request):
     # result = True
 
     if result:
-        # json_data = {
-        #     "user": user.id,
-        #     "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
-        # }
+        json_data = {
+            "user": user.id,
+            "email":user.email,
+            "workspace":user.domain,
+            "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
+        }
 
-        # token = jwt.encode(json_data, SECRET_KEY)
+        token = jwt.encode(json_data, SECRET_KEY)
+        is_admin = user.is_superuser
 
         return JsonResponse({
             "message": "Login successful",
-            "workspacename":workspace
-            # "token": token
+            "workspacename":workspace,
+            "is_admin":is_admin,
+        
+            "token": token
         })
 
     return JsonResponse({
-        "message": "Invalid email/password"
+        "message": "Invalid email/password",
+        "token":token
     }, status = 401)
                                     
     # except:
@@ -862,7 +870,7 @@ def getstaffs(request):
 @csrf_exempt
 def workspacedetails(request):
     if request.method != 'POST':
-        return JsonResponse({"message":"Invalid method, Method not allowed"})
+        return JsonResponse({"message":"Invalid method, Method not allowed"}, status=400)
 
     body = json.loads(request.body.decode('utf-8'))
 
@@ -930,3 +938,66 @@ def deleter(request):
 
     
     return JsonResponse({"message":"deleted"})
+
+# @login_required()
+def logout(request):
+
+    auth.logout(request)
+    return (JsonResponse({"message":"User logged out"}))
+
+
+@csrf_exempt
+def upload(request):
+    if request.method != 'POST':
+        return JsonResponse({"Invalid Method, Method not allowed"}, status=400)
+    # body = json.loads(request.body.decode('utf-8'))
+    body_unicode = request.body.decode('utf-8')
+    body = json.loads(body_unicode)
+    try:
+        thumbnail = request.FILES
+    except Exception as e:
+        print(e)
+        return JsonResponse({"Invad"})
+        
+    # info = json.loads(request.data['email'])
+    email = body["email"]
+    print(body)
+
+    work = User.objects.filter(email=email).update(profile_img=thumbnail)
+    print(work)
+    user = User.objects.get(email=email)
+
+    # user.profile_img = thumbnail
+    user.save()
+
+    
+    return JsonResponse({"message":"successful"})
+
+
+    # user.profile_img = thumbnail
+
+
+
+
+@csrf_exempt
+def search(request):
+    if request.method != 'POST':
+        return JsonResponse({"Message":"Invalid Method, Method not allowed"}, status=400)
+    body = json.loads(request.body.decode('utf-8'))
+
+    name = body['name']
+    full_name_obj = User.objects.filter(full_name__icontains=name)
+
+    profiles = []
+
+    for user in full_name_obj:
+        info = {
+            "full_name": user.full_name,
+            "role": user.role
+
+        }
+        profiles.append(info)
+
+    # profile_list = list(chain(*profiles))
+
+    return JsonResponse({"profiles":profiles})

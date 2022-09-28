@@ -19,6 +19,8 @@ urlpatterns = [
     path('workspacedetails', views.workspacedetails),
     path('getallworkspace', views.getallworkspace),
     path('deleter', views.deleter),
+    path('logout', views.logout),
+    path('upload', views.upload),
+    path('search', views.search),
     
-
 ]
