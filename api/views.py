@@ -122,13 +122,13 @@ def token_generation(email):
     print(generate_token)
     
     # gmail_create_draft(content = 'token: ' + generate_token, emailto = user.company_email, emailfrom = 'fikayodan@gmail.com', emailsub = 'token')
-    send_mail(
-        'Bluetick',
-        'token to verify workspace: ' + generate_token,
-        settings.EMAIL_HOST_USER,
-        [email],
-        fail_silently=False,
-    )
+    # send_mail(
+    #     'Bluetick',
+    #     'token to verify workspace: ' + generate_token,
+    #     settings.EMAIL_HOST_USER,
+    #     [email],
+    #     fail_silently=False,
+    # )
     
     return  generate_token
     # return JsonResponse({
@@ -207,7 +207,7 @@ def login(request):
             "workspace":user.domain,
             "exp": (datetime.now(timezone.utc) + timedelta(hours=1))
         }
-
+        User.objects.filter(email=email).update(is_online=True)
         token = jwt.encode(json_data, SECRET_KEY)
         is_admin = user.is_superuser
 
@@ -221,7 +221,7 @@ def login(request):
 
     return JsonResponse({
         "message": "Invalid email/password",
-        "token":token
+        # "token":token
     }, status = 401)
                                     
     # except:
@@ -297,7 +297,8 @@ def createworkspace(request):
     setuser.role = "admin"
     setuser.domain = workspace_name
     setuser.set_password(password1)
-    # setuser.is_superuser
+    setuser.is_superuser = True
+    setuser.is_staff = True
     
     # try:
     user.save()
@@ -408,14 +409,14 @@ def addmem(request):
                 print(link)
         except Exception as e:
             print(e)
-        try:
-            send_mail(
-                subject="Invitation to Join Workspace",
-                message=body + link,
-                from_email=settings.EMAIL_HOST_USER,
-                recipient_list=[email])
-        except Exception as e:
-            print(e)
+        # try:
+        #     send_mail(
+        #         subject="Invitation to Join Workspace",
+        #         message=body + link,
+        #         from_email=settings.EMAIL_HOST_USER,
+        #         recipient_list=[email])
+        # except Exception as e:
+        #     print(e)
 
         # email = EmailMessage(
         #     subject="Invitation to Join Workspace",
@@ -527,72 +528,7 @@ def signup(request):
 
 # this is for the forgot password part of the app
 reset = TOTPVerification()
-@csrf_exempt
-def resetpassword(request):
-    if request.method != 'POST':
-        return JsonResponse({"message": "Invalid Method. Not Allowed"},
-                            status=400)
-    return JsonResponse({"message": "Missing required fields"})
 
-    body_unicode = request.body.decode('utf-8')
-    body = json.loads(body_unicode)
-
-    email = body['email']
-    print(type(email))
-    # if email == None:
-    
-    user = User.objects.get(email=email)
-
-    if user:
-        otp = reset.generate_token()
-        send_mail(
-            subject="Bluetick Workspace otp",
-            message=otp,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[email])
-        # token_generation(request,"Bluetick account otp",user.email)
-
-        return JsonResponse({
-            "message": "Otp sent"
-        },
-                        status=200)
-    else:
-        return JsonResponse({
-            "message": "User not found"
-        },
-                        status=404)
-
-    # otp = reset.generate_token(email)
-
-
-# sending the otp to the email i guess
-    send_mail(
-        subject="Reset password",
-        message=otp,
-        from_email=settings.EMAIL_HOST_USER,
-        recipient_list=[email])
-    otp = request.POST.get('otp')
-
-    
-    password = request.POST.get('password')
-
-
-    user = User.objects.get(email=email)
-
-    if user:
-        if user.otp == otp:
-            user.password = bcrypt.hashpw(password.encode('utf-8'),
-                                            bcrypt.gensalt())
-            user.save()
-            return JsonResponse({"message": "Password reset successfully"},
-                                status=200)
-        else:
-            return JsonResponse({"message": "Invalid OTP"},
-                                status=400)
-    else:
-        return JsonResponse({"message": "User not found"},
-                            status=404)
-# generate token for resetting password
 @csrf_exempt
 def forgotpassword(request):
     if request.method != 'POST':
@@ -608,11 +544,11 @@ def forgotpassword(request):
     
         token = reset.generate_token()
 
-        send_mail(
-            subject="Reset password",
-            message=token,
-            from_email=settings.EMAIL_HOST_USER,
-            recipient_list=[email])
+        # send_mail(
+        #     subject="Reset password",
+        #     message=token,
+        #     from_email=settings.EMAIL_HOST_USER,
+        #     recipient_list=[email])
 
         return JsonResponse({"message":"Token sent to mail","token":token})
     else:
@@ -721,7 +657,12 @@ def reset_password(request):
         if user:
             user_main = User.objects.get(email=email_ad)
             if user_main.pas_reset == True:
-                us = User.objects.filter(email=email_ad).update(password = (bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
+                # us = User.objects.filter(email=email_ad).update(password = (bcrypt.hashpw(password1.encode('utf-8'), bcrypt.gensalt())))
+                # User.objects.filter(email=email_ad).update(password=password1)
+                user_main.set_password(password1)
+                user_main.save()
+                us = True
+
                 # us.password = bcrypt.hashpw(password1.encode('utf-8'),
                 #                                     bcrypt.gensalt())
                 if us == 1:
@@ -818,8 +759,10 @@ def getdetails(request):
             "role":user.role,
             # "is_admin":user.is_admin,
             "is_staff":user.is_staff,
+            "is_admin":user.is_superuser,
             "workspace":user.domain,
             "fullname":user.full_name,
+            "is_online":user.is_online,
             # the image field should just be like a url
             "profileimg":user.profile_img.url
 
@@ -852,6 +795,7 @@ def getstaffs(request):
             "role":each.role,
             # "is_admin":each.is_admin,
             "is_staff":each.is_staff,
+            "is_admin":each.is_superuser,
             "workspace":each.domain,
             "fullname":each.full_name,
             # the image field should just be like a url
@@ -940,9 +884,14 @@ def deleter(request):
     return JsonResponse({"message":"deleted"})
 
 # @login_required()
+@csrf_exempt
 def logout(request):
-
-    auth.logout(request)
+    body = json.loads(request.body.decode('utf-8'))
+    email = body["email"]
+    # auth.logout(request)
+    user= User.objects.get(email=email)
+    user.is_online = False
+    user.save()
     return (JsonResponse({"message":"User logged out"}))
 
 

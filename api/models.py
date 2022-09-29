@@ -84,6 +84,7 @@ class User(AbstractUser):
     full_name = models.CharField(max_length=250, null=True)
     role = models.CharField(max_length=50, default="Null")
     profile_img = models.ImageField(upload_to='profile_img', default = 'blank-profile-picture.png')
+    is_online = models.BooleanField(default=False)
 
     # profile_img = models.ImageField(upload_to='profile_img', default = 'https://res.cloudinary.com/dg4zlcau8/image/upload/v1661916483/blank-profile-picture_v6ojkd.png')
 
