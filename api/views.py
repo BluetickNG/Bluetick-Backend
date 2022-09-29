@@ -368,8 +368,9 @@ def addmem(request):
     print(email_list)
 
     workspace = Domain.objects.values_list('company_email', flat=True)
+    workspacenames = Domain.objects.values_list('company_name', flat=True)
 
-    if workspacename not in workspace:
+    if workspacename not in workspacenames:
         return JsonResponse({"message":"workspace does not exist"})
     # if the  email is already a workspace email return error
     # return JsonResponse({"message":"rest"})
