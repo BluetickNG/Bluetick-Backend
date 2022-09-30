@@ -1,5 +1,4 @@
 from __future__ import print_function
-from asyncio import FastChildWatcher
 from datetime import datetime, timedelta, timezone
 import email
 from email import message
@@ -221,7 +220,7 @@ def login(request):
             "message": "Login successful",
             "workspacename":workspace,
             "is_admin":is_admin,
-            "is_staff":isstaff,
+            # "is_staff":isstaff,
         
             "token": token
         })
