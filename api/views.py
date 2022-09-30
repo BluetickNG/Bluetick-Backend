@@ -371,14 +371,14 @@ def addmem(request):
     workspacenames = Domain.objects.values_list('company_name', flat=True)
 
     if workspacename not in workspacenames:
-        return JsonResponse({"message":"workspace does not exist"})
+        return JsonResponse({"message":"workspace does not exist"}, status=400)
     # if the  email is already a workspace email return error
     # return JsonResponse({"message":"rest"})
     link_list = []
     for email in email_list:
         print("hello")
         if email in workspace:
-            return JsonResponse({"message": email + " already in system"})
+            return JsonResponse({"message": email + " already in system"}, status=400)
             
 
         new_toke = TOTPVerification()
@@ -433,7 +433,7 @@ def addmem(request):
 
     # # for each member on the email list generate a special token and add something then save it in the database
     # # Then send it to the email
-    return JsonResponse({"message":"member added", "link":link_list})  
+    return JsonResponse({"message":"member added", "link":link_list}, status=200)  
 
 
 # signup as a new user ie not admin/ workspace
@@ -542,7 +542,8 @@ def forgotpassword(request):
         email = body['email']
     except:
         return JsonResponse({"message":"Incomplete or incorrect credentials"})
-
+    if User.objects.get(email=email).is_online == False:
+        return JsonResponse({"message":"permission denied. Login!"}, status=403)
     # check if the email is in the database
     if User.objects.filter(email=email).exists() or Domain.objects.filter(company_email=email).exists():
     
@@ -572,6 +573,9 @@ def token_verify(request):
         email = body['email']
     except:
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
+
+    if User.objects.get(email=email).is_online == False:
+        return JsonResponse({"message":"permission denied. Login!"}, status=403)
     # print(token)
     # add if the user is verified or not in the database
     if toke.verify_token(token):
@@ -598,6 +602,9 @@ def reset_verify(request):
 
     token = body['token']
     email = body['email']
+
+    if User.objects.get(email=email).is_online == False:
+        return JsonResponse({"message":"permission denied. Login!"}, status=403)
 
     if reset.verify_token(token):
         # set the pas_reset to true
@@ -627,6 +634,8 @@ def reset_password(request):
 
     email_ad = body['email']
 
+    if User.objects.get(email=email_ad).is_online == False:
+        return JsonResponse({"message":"permission denied. Login!"}, status=403)
     # print(type(email_ad))
     # print(email_ad)
     # user = User.objects.get(email=email_ad)
