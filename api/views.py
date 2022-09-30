@@ -1,4 +1,5 @@
 from __future__ import print_function
+from asyncio import FastChildWatcher
 from datetime import datetime, timedelta, timezone
 import email
 from email import message
@@ -211,10 +212,16 @@ def login(request):
         token = jwt.encode(json_data, SECRET_KEY)
         is_admin = user.is_superuser
 
+        if user.is_superuser == False and user.is_staff == True:
+            isstaff = True
+        else:
+            isstaff = False
+
         return JsonResponse({
             "message": "Login successful",
             "workspacename":workspace,
             "is_admin":is_admin,
+            "is_staff":isstaff,
         
             "token": token
         })
@@ -937,9 +944,6 @@ def upload(request):
 
 
     # user.profile_img = thumbnail
-
-
-
 
 @csrf_exempt
 def search(request):
