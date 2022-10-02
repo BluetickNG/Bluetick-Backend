@@ -590,7 +590,9 @@ def token_verify(request):
             "message": "Token verified"
         },status=200)
     else:
-        Domain.objects.get(company_email=email).delete()
+        # Domain.objects.filter(company_email=email).delete()
+        
+        # User.objects.get(email=email).delete()
         # delete the data from the database 
         return JsonResponse({
             "message": "Invalid token"
