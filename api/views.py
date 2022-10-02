@@ -185,9 +185,15 @@ def login(request):
     #         "message": "Missing credentials"
     #     }, status = 400)
     # return JsonResponse({"message":"done"})
-    # try:
-    user = User.objects.get(email=email)
-    workspace = user.domain
+    try:
+        user = User.objects.get(email=email)
+        workspace = user.domain
+    except:
+        return JsonResponse({
+            "message":"Invalid Email"
+        })
+    if Domain.objects.get(company_email=email).verified is False:
+        return JsonResponse({"message":"Acces Denied, Account not verified"})
     # byte_pass = password.encode('utf-8')
     # byte_pass = bytes(password.encode('utf-8'))
     # print(type(byte_pass))
