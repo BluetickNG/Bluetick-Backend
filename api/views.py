@@ -591,7 +591,15 @@ def token_verify(request):
         },status=200)
     else:
         # Domain.objects.filter(company_email=email).delete()
-        
+        try:
+            user = User.objects.filter(email=email).delete()
+            print(user)
+            Domain.objects.get(company_email=email).delete()
+        except:
+            return JsonResponse({
+                "message":"deleted"
+            })
+
         # User.objects.get(email=email).delete()
         # delete the data from the database 
         return JsonResponse({
