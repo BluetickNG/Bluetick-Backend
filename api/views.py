@@ -192,8 +192,13 @@ def login(request):
         return JsonResponse({
             "message":"Invalid Email"
         })
-    if Domain.objects.get(company_email=email).verified is False:
-        return JsonResponse({"message":"Acces Denied, Account not verified"})
+    try:
+        if Domain.objects.get(company_email=email).verified is False:
+            User.objects.filter(email=email).delete()   
+            Domain.objects.filter(company_email=email).delete()   
+            return JsonResponse({"message":"Access Denied, Account not verified"})
+    except:
+        print("continue")
     # byte_pass = password.encode('utf-8')
     # byte_pass = bytes(password.encode('utf-8'))
     # print(type(byte_pass))
@@ -259,6 +264,14 @@ def createworkspace(request):
         workspace_name = body['workspace_name']
     except:
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
+    
+    # If workspace was created and not verified delete the previously saved data and add this new one
+    try:
+        if Domain.objects.get(company_email=email).verified is False:
+            User.objects.filter(email=email).delete()   
+            Domain.objects.filter(company_email=email).delete()   
+    except:
+        print("continue")
 
     workspace = Domain.objects.values_list('company_email', flat=True)
     # user = User.objects.values_list('email', flat=True)
