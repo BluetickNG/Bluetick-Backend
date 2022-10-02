@@ -580,8 +580,8 @@ def token_verify(request):
     except:
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
 
-    if User.objects.get(email=email).is_online == False:
-        return JsonResponse({"message":"permission denied. Login!"}, status=403)
+    # if User.objects.get(email=email).is_online == False:
+    #     return JsonResponse({"message":"permission denied. Login!"}, status=403)
     # print(token)
     # add if the user is verified or not in the database
     if toke.verify_token(token):
