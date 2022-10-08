@@ -10,6 +10,11 @@ from django.shortcuts import render
 from django.http.response import JsonResponse, HttpResponse,HttpResponseBadRequest
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login
+from api.models import Message
+from api.serializers import MessageSerializer
+from .models import User
+from rest_framework.parsers import JSONParser
 
 import bcrypt
 import jwt
@@ -42,6 +47,7 @@ from unittest import mock
 import time
 from itertools import chain
 import json
+from serializers import UserSerializer
 
 from django.core.mail import EmailMessage
 
@@ -109,6 +115,25 @@ SECRET_KEY= 'omo'
 toke = TOTPVerification()
 
 
+def user_list(request, pk=None):
+    """
+    List all required messages, or create a new message.
+    """
+    if request.method == 'GET':
+        if pk:                                                                      # If PrimaryKey (id) of the user is specified in the url
+            users = User.objects.filter(id=pk)              # Select only that particular user
+        else:
+            users = User.objects.all()                             # Else get all user list
+        serializer = UserSerializer(users, many=True, context={'request': request}) 
+        return JsonResponse(serializer.data, safe=False)               # Return serialized data
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)           # On POST, parse the request object to obtain the data in json
+        serializer = UserSerializer(data=data)        # Seraialize the data
+        if serializer.is_valid():
+            serializer.save()                                            # Save it if valid
+            return JsonResponse(serializer.data, status=201)   
+        return JsonResponse(serializer.errors, status=400)
+
 @csrf_exempt
 def token_generation(email):
     """generate the token and send it to the user"""
@@ -156,6 +181,8 @@ def index(request):
     return JsonResponse({
         "message": "Unauthenticated",
     }, status = 403)
+
+
 
 
 
@@ -220,6 +247,27 @@ def login(request):
     #     print("User record not found")
     #     return JsonResponse({"message": "User not found"}, status=404)
 # signing up a new workspace
+
+
+
+@csrf_exempt
+def message_list(request, sender=None, receiver=None):
+    """
+    List all required messages, or create a new message.
+    """
+    if request.method == 'GET':
+        messages = Message.objects.filter(sender_id=sender, receiver_id=receiver)
+        serializer = MessageSerializer(messages, many=True, context={'request': request})
+        return JsonResponse(serializer.data, safe=False)
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = MessageSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data, status=201)
+        return JsonResponse(serializer.errors, status=400)
+
+
 @csrf_exempt
 def createworkspace(request):
     if request.method != 'POST':
