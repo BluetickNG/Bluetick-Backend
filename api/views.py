@@ -262,6 +262,7 @@ def createworkspace(request):
         password2 = body['password2']
         phone = body['phone']
         workspace_name = body['workspace_name']
+        admin_name = body['full_name']
     except:
         return JsonResponse({"message":"Invalid or incomplete credentials"}, status = 400)
     
@@ -317,7 +318,7 @@ def createworkspace(request):
 
     token = token_generation(user.company_email)
 
-    setuser.full_name = workspace_name
+    setuser.full_name = admin_name
     setuser.email = email
     setuser.role = "admin"
     setuser.domain = workspace_name
@@ -392,17 +393,18 @@ def addmem(request):
 
     print(email_list)
 
-    workspace = Domain.objects.values_list('company_email', flat=True)
+    users = User.objects.values_list('email', flat=True)
     workspacenames = Domain.objects.values_list('company_name', flat=True)
 
     if workspacename not in workspacenames:
         return JsonResponse({"message":"workspace does not exist"}, status=400)
     # if the  email is already a workspace email return error
     # return JsonResponse({"message":"rest"})
+    
     link_list = []
     for email in email_list:
         print("hello")
-        if email in workspace:
+        if email in users:
             return JsonResponse({"message": email + " already in system"}, status=400)
             
 
@@ -812,7 +814,9 @@ def getdetails(request):
             "fullname":user.full_name,
             "is_online":user.is_online,
             # the image field should just be like a url
-            "profileimg":user.profile_img.url
+            # "profileimg":user.profile_img.url
+            "profileimg": "https://res.cloudinary.com/dg4zlcau8/image/upload/v1661916483/blank-profile-picture_v6ojkd.png" 
+
 
         }
         return JsonResponse({"details":user_details})
@@ -847,7 +851,8 @@ def getstaffs(request):
             "workspace":each.domain,
             "fullname":each.full_name,
             # the image field should just be like a url
-            "profileimg":each.profile_img.url
+            # "profileimg":each.profile_img.url
+            "profileimg": "https://res.cloudinary.com/dg4zlcau8/image/upload/v1661916483/blank-profile-picture_v6ojkd.png" 
             }
             all_staff_details.append(user_details)
             number_of_staffs+=1
@@ -883,7 +888,7 @@ def workspacedetails(request):
             "company name":user.company_name,
             "verified":user.verified,
             # the image field should just be like a url
-            "profileimg":user.Workspace_profile_img.url
+            # "profileimg":user.Workspace_profile_img.url
 
         }
         return JsonResponse({"details":user_details})
@@ -912,7 +917,7 @@ def getallworkspace(request):
             "workspace phone":each.company_phone,
             "company name":each.company_name,
             # the image field should just be like a url
-            "profileimg":each.Workspace_profile_img.url
+            # "profileimg":each.Workspace_profile_img.url
             }
             all_staff_details.append(user_details)
             number_of_staffs+=1
@@ -995,3 +1000,6 @@ def search(request):
     # profile_list = list(chain(*profiles))
 
     return JsonResponse({"profiles":profiles})
+
+
+

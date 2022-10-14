@@ -83,6 +83,7 @@ class User(AbstractUser):
 
     full_name = models.CharField(max_length=250, null=True)
     role = models.CharField(max_length=50, default="Null")
+    # profile_img = models.ImageField(upload_to='profile_img')
     profile_img = models.ImageField(upload_to='profile_img', default = 'blank-profile-picture.png')
     is_online = models.BooleanField(default=False)
 
