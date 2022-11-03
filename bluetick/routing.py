@@ -7,9 +7,9 @@ from django.urls import path
 application = ProtocolTypeRouter({
     'websocket': AllowedHostsOriginValidator(
         AuthMiddlewareStack(
-            # URLRouter()
+            URLRouter(chat.routing.websocket_urlpatterns)
 
         )
-    )
+    ),
 })
 

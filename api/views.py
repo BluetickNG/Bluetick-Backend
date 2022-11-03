@@ -814,8 +814,8 @@ def getdetails(request):
             "fullname":user.full_name,
             "is_online":user.is_online,
             # the image field should just be like a url
-            # "profileimg":user.profile_img.url
-            "profileimg": "https://res.cloudinary.com/dg4zlcau8/image/upload/v1661916483/blank-profile-picture_v6ojkd.png" 
+            "profileimg":user.profile_img.url
+            # "profileimg": "https://res.cloudinary.com/dg4zlcau8/image/upload/v1661916483/blank-profile-picture_v6ojkd.png"    
 
 
         }
