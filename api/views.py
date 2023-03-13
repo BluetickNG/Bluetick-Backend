@@ -47,7 +47,7 @@ from unittest import mock
 import time
 from itertools import chain
 import json
-from serializers import UserSerializer
+from .serializers import UserSerializer
 
 from django.core.mail import EmailMessage
 
